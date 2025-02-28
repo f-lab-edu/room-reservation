@@ -33,4 +33,9 @@ public class UserController {
         return new BaseResponse.success<>(new MessageResponse(responseMessage));
     }
 
+    @PostMapping("/v1/phone/certification")
+    public BaseResponse<MessageResponse> verifyCertification(@RequestBody Map<String, String> payload) {
+        userService.verifyCertification(payload);
+        return new BaseResponse.success<>(new MessageResponse("인증되었습니다"));
+    }
 }

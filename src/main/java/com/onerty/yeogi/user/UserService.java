@@ -80,4 +80,16 @@ public class UserService {
         return phoneNumber + " 로 인증번호가 발송되었습니다: " + code;
     }
 
+    public void verifyCertification(Map<String, String> payload) {
+        String phoneNumber = payload.get("phoneNumber");
+        String certificationNumber = payload.get("certificationNumber");
+        String storedCode = redisTemplate.opsForValue().get(phoneNumber);
+
+        if (storedCode == null || !storedCode.trim().equals(certificationNumber.trim())) {
+            throw new YeogiException(ErrorType.SMS_AUTH_FAILED);
+        }
+
+        redisTemplate.delete(phoneNumber);
+    }
+
 }
