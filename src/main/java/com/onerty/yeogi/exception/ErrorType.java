@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 public enum ErrorType {
 
     TERMS_NOT_FOUND("a0001", HttpStatus.NOT_FOUND, "저장된 약관 내역이 없습니다"),
+    SMS_AUTH_MISSING_REQUIRED_FIELD("a0002", HttpStatus.BAD_REQUEST, "sms 인증 필수 입력값이 누락되었습니다"),
 
     INTERNAL_SERVER_ERROR("common", HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류");
 

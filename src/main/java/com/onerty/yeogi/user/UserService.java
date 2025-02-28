@@ -9,10 +9,13 @@ import com.onerty.yeogi.term.dto.TermResponse;
 import com.onerty.yeogi.user.dto.NicknameResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -22,6 +25,7 @@ public class UserService {
 
     private final TermRepository termRepository;
     private final NicknameRepository nicknameRepository;
+    private final StringRedisTemplate redisTemplate;
 
     public TermResponse getTerms() {
         List<Term> terms = termRepository.findTermsWithLatestTermDetail();
@@ -68,6 +72,12 @@ public class UserService {
         return new NicknameResponse(nicknames.stream()
                 .limit(20)
                 .collect(Collectors.toList()));
+    }
+
+    public String sendCertification(String phoneNumber) {
+        String code = String.valueOf((int) (Math.random() * 9000) + 1000);
+        redisTemplate.opsForValue().set(phoneNumber, code, 5, TimeUnit.MINUTES);
+        return phoneNumber + " 로 인증번호가 발송되었습니다: " + code;
     }
 
 }
