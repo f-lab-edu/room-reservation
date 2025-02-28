@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final AgreementRepository agreementRepository;
     private final TermRepository termRepository;
     private final NicknameRepository nicknameRepository;
     private final StringRedisTemplate redisTemplate;
@@ -36,7 +37,11 @@ public class UserService {
         validateDuplicateUserAttributes(user);
         userRepository.save(user);
 
-        boolean isMarketingAgreed = signupDto.marketingAcceptance();
+        termAgreement(user, signupDto);
+        boolean isMarketingAgreed =  agreementRepository.findIsAgreedByAgreementId(
+                user.getUserId(), 3L // termId = 3 (마케팅 수집 동의)
+        ).orElse(false);
+
         return new UserSignupResponse(user.getUserId().toString(), isMarketingAgreed);
     }
 
@@ -49,6 +54,28 @@ public class UserService {
         if (userRepository.existsByNickname(user.getNickname())) {
             throw new YeogiException(ErrorType.DUPLICATE_NICKNAME);
         }
+    }
+
+    private void termAgreement(User user, UserSignupRequest userSignupRequest) {
+
+        List<Term> terms = termRepository.findTermsWithLatestTermDetail();
+
+        List<Agreement> agreements = terms.stream()
+                .map(term -> {
+
+                    boolean isAgreed = term.isRequired() ||
+                            switch (term.getTermId().intValue()) {
+                                case 2 -> userSignupRequest.privacyAuxiliaryPolicy();
+                                case 3 -> userSignupRequest.marketingAcceptance();
+                                case 4 -> userSignupRequest.locationPolicy();
+                                default -> false;
+                            };
+
+                    return new Agreement(new AgreementId(user.getUserId(), term.getTermId()), isAgreed);
+                })
+                .collect(Collectors.toList());
+
+        agreementRepository.saveAll(agreements);
     }
 
 
