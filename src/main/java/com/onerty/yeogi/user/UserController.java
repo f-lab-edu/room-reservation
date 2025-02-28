@@ -2,6 +2,7 @@ package com.onerty.yeogi.user;
 
 
 import com.onerty.yeogi.term.dto.TermResponse;
+import com.onerty.yeogi.user.dto.NicknameResponse;
 import com.onerty.yeogi.util.BaseResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,4 +21,8 @@ public class UserController {
         return new BaseResponse.success<>(userService.getTerms());
     }
 
+    @GetMapping("/v1/nicknames-recommendation")
+    public BaseResponse<NicknameResponse> getNicknames() {
+        return new BaseResponse.success<>(userService.generateRandomNicknames());
+    }
 }
