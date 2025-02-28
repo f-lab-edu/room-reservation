@@ -2,11 +2,13 @@ package com.onerty.yeogi.user;
 
 import com.onerty.yeogi.exception.ErrorType;
 import com.onerty.yeogi.exception.YeogiException;
-import com.onerty.yeogi.term.Term;
-import com.onerty.yeogi.term.TermRepository;
+import com.onerty.yeogi.term.*;
 import com.onerty.yeogi.term.dto.TermDto;
 import com.onerty.yeogi.term.dto.TermResponse;
 import com.onerty.yeogi.user.dto.NicknameResponse;
+import com.onerty.yeogi.user.dto.UserSignupRequest;
+import com.onerty.yeogi.user.dto.UserSignupResponse;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -23,9 +25,32 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class UserService {
 
+    private final UserRepository userRepository;
     private final TermRepository termRepository;
     private final NicknameRepository nicknameRepository;
     private final StringRedisTemplate redisTemplate;
+
+    @Transactional
+    public UserSignupResponse registerUser(UserSignupRequest signupDto) {
+        User user = new User(signupDto);
+        validateDuplicateUserAttributes(user);
+        userRepository.save(user);
+
+        boolean isMarketingAgreed = signupDto.marketingAcceptance();
+        return new UserSignupResponse(user.getUserId().toString(), isMarketingAgreed);
+    }
+
+    private void validateDuplicateUserAttributes(User user) {
+
+        if (userRepository.existsByUserIdentifier(user.getUserIdentifier())) {
+            throw new YeogiException(ErrorType.DUPLICATE_EMAIL);
+        }
+
+        if (userRepository.existsByNickname(user.getNickname())) {
+            throw new YeogiException(ErrorType.DUPLICATE_NICKNAME);
+        }
+    }
+
 
     public TermResponse getTerms() {
         List<Term> terms = termRepository.findTermsWithLatestTermDetail();
