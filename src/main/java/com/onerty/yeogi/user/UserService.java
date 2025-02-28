@@ -1,5 +1,7 @@
 package com.onerty.yeogi.user;
 
+import com.onerty.yeogi.exception.ErrorType;
+import com.onerty.yeogi.exception.YeogiException;
 import com.onerty.yeogi.term.Term;
 import com.onerty.yeogi.term.TermRepository;
 import com.onerty.yeogi.term.dto.TermDto;
@@ -20,6 +22,9 @@ public class UserService {
 
     public TermResponse getTerms() {
         List<Term> terms = termRepository.findTermsWithLatestTermDetail();
+        if (terms.isEmpty()) {
+            throw new YeogiException(ErrorType.TERMS_NOT_FOUND);
+        }
 
         List<TermDto> termDtos = terms.stream()
                 .map(term -> new TermDto(
