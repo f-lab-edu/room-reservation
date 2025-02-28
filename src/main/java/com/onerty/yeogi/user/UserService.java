@@ -6,10 +6,12 @@ import com.onerty.yeogi.term.Term;
 import com.onerty.yeogi.term.TermRepository;
 import com.onerty.yeogi.term.dto.TermDto;
 import com.onerty.yeogi.term.dto.TermResponse;
+import com.onerty.yeogi.user.dto.NicknameResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -19,6 +21,7 @@ import java.util.stream.Collectors;
 public class UserService {
 
     private final TermRepository termRepository;
+    private final NicknameRepository nicknameRepository;
 
     public TermResponse getTerms() {
         List<Term> terms = termRepository.findTermsWithLatestTermDetail();
@@ -36,6 +39,35 @@ public class UserService {
                 .collect(Collectors.toList());
 
         return new TermResponse(termDtos);
+    }
+
+    public NicknameResponse generateRandomNicknames() {
+        List<String> adjectives1 = nicknameRepository.findByType(NicknameType.ADJECTIVE1)
+                .stream()
+                .map(Nickname::getValue)
+                .toList();
+
+        List<String> adjectives2 = nicknameRepository.findByType(NicknameType.ADJECTIVE2)
+                .stream()
+                .map(Nickname::getValue)
+                .toList();
+
+        List<String> nouns = nicknameRepository.findByType(NicknameType.NOUN)
+                .stream()
+                .map(Nickname::getValue)
+                .toList();
+
+        List<String> nicknames = adjectives1.stream()
+                .flatMap(adj1 -> adjectives2.stream()
+                        .flatMap(adj2 -> nouns.stream()
+                                .map(noun -> adj1 + adj2 + noun)))
+                .collect(Collectors.toList());
+
+        Collections.shuffle(nicknames);
+
+        return new NicknameResponse(nicknames.stream()
+                .limit(20)
+                .collect(Collectors.toList()));
     }
 
 }
