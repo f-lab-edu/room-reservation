@@ -33,6 +33,7 @@ public class UserService {
 
     @Transactional
     public UserSignupResponse registerUser(UserSignupRequest signupDto) {
+        signupDto.check();
         User user = new User(signupDto);
         validateDuplicateUserAttributes(user);
         userRepository.save(user);

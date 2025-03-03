@@ -1,8 +1,8 @@
 package com.onerty.yeogi.user.dto;
 
-import com.github.ownert.yeogi.exception.ErrorType;
-import com.github.ownert.yeogi.exception.YeogiException;
-import com.github.ownert.yeogi.util.Checkable;
+import com.onerty.yeogi.exception.YeogiException;
+import com.onerty.yeogi.exception.ErrorType;
+import com.onerty.yeogi.util.Checkable;
 
 import java.util.regex.Pattern;
 
