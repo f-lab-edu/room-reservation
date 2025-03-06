@@ -34,6 +34,7 @@ public class UserService {
     @Transactional
     public UserSignupResponse registerUser(UserSignupRequest signupDto) {
         signupDto.check();
+        validateDuplicateUserAttributes(signupDto.uid(), signupDto.unick());
         User user = new User(signupDto);
         validateDuplicateUserAttributes(user);
         userRepository.save(user);
@@ -48,12 +49,15 @@ public class UserService {
     }
 
     private void validateDuplicateUserAttributes(User user) {
+    private void validateDuplicateUserAttributes(String email, String nickname) {
 
         if (userRepository.existsByUserIdentifier(user.getUserIdentifier())) {
+        if (userRepository.existsByUserIdentifier(email)) {
             throw new YeogiException(ErrorType.DUPLICATE_EMAIL);
         }
 
         if (userRepository.existsByNickname(user.getNickname())) {
+        if (userRepository.existsByNickname(nickname)) {
             throw new YeogiException(ErrorType.DUPLICATE_NICKNAME);
         }
     }
