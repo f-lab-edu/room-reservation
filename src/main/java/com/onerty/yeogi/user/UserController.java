@@ -21,6 +21,7 @@ public class UserController {
 
     @PostMapping("/signup")
     public BaseResponse<UserSignupResponse> signup(@RequestBody UserSignupRequest signupDto) {
+        signupDto.check();
         UserSignupResponse response = userService.registerUser(signupDto);
         return new BaseResponse.success<>(response);
     }

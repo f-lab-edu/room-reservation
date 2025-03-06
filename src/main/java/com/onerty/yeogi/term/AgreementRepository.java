@@ -14,6 +14,6 @@ public interface AgreementRepository extends JpaRepository<Agreement, Long> {
             WHERE a.agreementId.user = :user
               AND a.agreementId.title = :title
             """)
-    Optional<Boolean> findIsAgreedByAgreementId(User user, String title);
+    Optional<Boolean> findIsAgreedByUserAndTitle(User user, String title);
 
 }

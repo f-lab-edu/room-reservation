@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -31,54 +32,82 @@ public class UserService {
     private final NicknameRepository nicknameRepository;
     private final StringRedisTemplate redisTemplate;
 
-    @Transactional
     public UserSignupResponse registerUser(UserSignupRequest signupDto) {
-        signupDto.check();
-        User user = new User(signupDto);
-        validateDuplicateUserAttributes(user);
-        userRepository.save(user);
+        validateDuplicateUserAttributes(signupDto.uid(), signupDto.unick());
+        validateLatestAndRequiredTerms(signupDto.agreements());
 
-        termAgreement(user, signupDto);
-        boolean isMarketingAgreed = agreementRepository.findIsAgreedByAgreementId(
-                user, "마케팅 수집 동의" // termId = 3 (마케팅 수집 동의)
+        User user = new User(signupDto);
+        userRepository.save(user);
+        saveAgreements(user, signupDto.agreements());
+
+        boolean isMarketingAgreed = agreementRepository.findIsAgreedByUserAndTitle(
+                user, TermTitle.MARKETING_CONSENT.name()
         ).orElse(false);
 
         return new UserSignupResponse(user.getUserId().toString(), isMarketingAgreed);
     }
 
-    private void validateDuplicateUserAttributes(User user) {
+    private void validateDuplicateUserAttributes(String email, String nickname) {
 
-        if (userRepository.existsByUserIdentifier(user.getUserIdentifier())) {
+        if (userRepository.existsByUserIdentifier(email)) {
             throw new YeogiException(ErrorType.DUPLICATE_EMAIL);
         }
 
-        if (userRepository.existsByNickname(user.getNickname())) {
+        if (userRepository.existsByNickname(nickname)) {
             throw new YeogiException(ErrorType.DUPLICATE_NICKNAME);
         }
     }
 
-    private void termAgreement(User user, UserSignupRequest userSignupRequest) {
+    private void validateLatestAndRequiredTerms(List<Map<Long, Boolean>> agreements) {
+        if (agreements == null || agreements.isEmpty()) {
+            throw new YeogiException(ErrorType.TERMS_NOT_FOUND);
+        }
 
-        List<Term> terms = termRepository.findTermsWithLatestTermDetail();
+        List<Term> latestTerms = termRepository.findTermsWithLatestTermDetail();
 
-        List<Agreement> agreements = terms.stream()
-                .map(term -> {
+        // 1. 최신 약관이 아닌 ID가 포함되었는지 검증
+        Set<Long> latestTermIds = latestTerms.stream()
+                .map(Term::getTermId)
+                .collect(Collectors.toSet());
 
-                    boolean isAgreed = term.isRequired() ||
-                            switch (term.getTermId().intValue()) {
-                                case 2 -> userSignupRequest.privacyAuxiliaryPolicy();
-                                case 3 -> userSignupRequest.marketingAcceptance();
-                                case 4 -> userSignupRequest.locationPolicy();
-                                default -> false;
-                            };
+        Set<Long> providedTermIds = agreements.stream()
+                .flatMap(map -> map.keySet().stream())
+                .collect(Collectors.toSet());
 
-                    return new Agreement(new AgreementId(user, term.getTitle(), term.getVersion()), isAgreed);
-                })
-                .collect(Collectors.toList());
+        if (!providedTermIds.containsAll(latestTermIds)) {
+            throw new YeogiException(ErrorType.SIGNUP_INVALID_TERM_ID);
+        }
 
-        agreementRepository.saveAll(agreements);
+        // 2. 필수 약관이 모두 동의되었는지 검증
+        Map<Long, Boolean> agreementMap = agreements.stream()
+                .flatMap(map -> map.entrySet().stream())
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+        boolean allRequiredTermsAgreed = latestTerms.stream()
+                .filter(Term::isRequired)
+                .allMatch(term -> Boolean.TRUE.equals(agreementMap.get(term.getTermId())));
+
+        if (!allRequiredTermsAgreed) {
+            throw new YeogiException(ErrorType.SIGNUP_REQUIRED_TERMS_NOT_ACCEPTED);
+        }
     }
 
+    private void saveAgreements(User user, List<Map<Long, Boolean>> agreements) {
+        List<Term> terms = termRepository.findTermsWithLatestTermDetail();
+
+        Map<Long, Boolean> agreementMap = agreements.stream()
+                .flatMap(map -> map.entrySet().stream())
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+        List<Agreement> agreementList = terms.stream()
+                .map(term -> new Agreement(
+                        new AgreementId(user, term.getTitle(), term.getVersion()),
+                        agreementMap.getOrDefault(term.getTermId(), false)
+                ))
+                .collect(Collectors.toList());
+
+        agreementRepository.saveAll(agreementList);
+    }
 
     public TermResponse getTerms() {
         List<Term> terms = termRepository.findTermsWithLatestTermDetail();
@@ -89,7 +118,7 @@ public class UserService {
         List<TermDto> termDtos = terms.stream()
                 .map(term -> new TermDto(
                         term.getTermId(),
-                        term.getTitle(),
+                        TermTitle.valueOf(term.getTitle()).getKoreanTitle(),
                         term.getContent(),
                         term.isRequired()
                 ))
