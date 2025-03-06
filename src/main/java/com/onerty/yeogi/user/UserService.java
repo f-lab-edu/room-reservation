@@ -33,7 +33,6 @@ public class UserService {
     private final StringRedisTemplate redisTemplate;
 
     public UserSignupResponse registerUser(UserSignupRequest signupDto) {
-        signupDto.check();
         validateDuplicateUserAttributes(signupDto.uid(), signupDto.unick());
         validateLatestAndRequiredTerms(signupDto.agreements());
 
