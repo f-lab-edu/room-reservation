@@ -2,11 +2,13 @@ package com.onerty.yeogi.user;
 
 import com.onerty.yeogi.exception.ErrorType;
 import com.onerty.yeogi.exception.YeogiException;
-import com.onerty.yeogi.term.Term;
-import com.onerty.yeogi.term.TermRepository;
+import com.onerty.yeogi.term.*;
 import com.onerty.yeogi.term.dto.TermDto;
 import com.onerty.yeogi.term.dto.TermResponse;
 import com.onerty.yeogi.user.dto.NicknameResponse;
+import com.onerty.yeogi.user.dto.UserSignupRequest;
+import com.onerty.yeogi.user.dto.UserSignupResponse;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -23,9 +25,60 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class UserService {
 
+    private final UserRepository userRepository;
+    private final AgreementRepository agreementRepository;
     private final TermRepository termRepository;
     private final NicknameRepository nicknameRepository;
     private final StringRedisTemplate redisTemplate;
+
+    @Transactional
+    public UserSignupResponse registerUser(UserSignupRequest signupDto) {
+        signupDto.check();
+        User user = new User(signupDto);
+        validateDuplicateUserAttributes(user);
+        userRepository.save(user);
+
+        termAgreement(user, signupDto);
+        boolean isMarketingAgreed =  agreementRepository.findIsAgreedByAgreementId(
+                user.getUserId(), 3L // termId = 3 (마케팅 수집 동의)
+        ).orElse(false);
+
+        return new UserSignupResponse(user.getUserId().toString(), isMarketingAgreed);
+    }
+
+    private void validateDuplicateUserAttributes(User user) {
+
+        if (userRepository.existsByUserIdentifier(user.getUserIdentifier())) {
+            throw new YeogiException(ErrorType.DUPLICATE_EMAIL);
+        }
+
+        if (userRepository.existsByNickname(user.getNickname())) {
+            throw new YeogiException(ErrorType.DUPLICATE_NICKNAME);
+        }
+    }
+
+    private void termAgreement(User user, UserSignupRequest userSignupRequest) {
+
+        List<Term> terms = termRepository.findTermsWithLatestTermDetail();
+
+        List<Agreement> agreements = terms.stream()
+                .map(term -> {
+
+                    boolean isAgreed = term.isRequired() ||
+                            switch (term.getTermId().intValue()) {
+                                case 2 -> userSignupRequest.privacyAuxiliaryPolicy();
+                                case 3 -> userSignupRequest.marketingAcceptance();
+                                case 4 -> userSignupRequest.locationPolicy();
+                                default -> false;
+                            };
+
+                    return new Agreement(new AgreementId(user.getUserId(), term.getTermId()), isAgreed);
+                })
+                .collect(Collectors.toList());
+
+        agreementRepository.saveAll(agreements);
+    }
+
 
     public TermResponse getTerms() {
         List<Term> terms = termRepository.findTermsWithLatestTermDetail();

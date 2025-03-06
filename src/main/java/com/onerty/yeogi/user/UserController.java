@@ -3,6 +3,8 @@ package com.onerty.yeogi.user;
 
 import com.onerty.yeogi.term.dto.TermResponse;
 import com.onerty.yeogi.user.dto.NicknameResponse;
+import com.onerty.yeogi.user.dto.UserSignupRequest;
+import com.onerty.yeogi.user.dto.UserSignupResponse;
 import com.onerty.yeogi.util.BaseResponse;
 import com.onerty.yeogi.util.MessageResponse;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +18,12 @@ import java.util.Map;
 public class UserController {
 
     private final UserService userService;
+
+    @PostMapping("/signup")
+    public BaseResponse<UserSignupResponse> signup(@RequestBody UserSignupRequest signupDto) {
+        UserSignupResponse response = userService.registerUser(signupDto);
+        return new BaseResponse.success<>(response);
+    }
 
     @GetMapping("/v1/terms/agree")
     public BaseResponse<TermResponse> getTerms() {
