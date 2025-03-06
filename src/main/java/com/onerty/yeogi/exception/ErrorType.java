@@ -11,7 +11,9 @@ public enum ErrorType {
     INVALID_EMAIL_FORMAT("a0005", HttpStatus.BAD_REQUEST, "이메일 형식이 올바르지 않습니다"),
     DUPLICATE_NICKNAME("a0006", HttpStatus.CONFLICT, "이미 사용 중인 닉네임입니다"),
     DUPLICATE_EMAIL("a0007", HttpStatus.CONFLICT, "이미 사용 중인 이메일입니다"),
-    SIGNUP_MISSING_REQUIRED_FIELD("a0008",  HttpStatus.BAD_REQUEST, "회원가입 필수 입력값이 누락되었습니다"),
+    SIGNUP_MISSING_REQUIRED_FIELD("a0008", HttpStatus.BAD_REQUEST, "회원가입 필수 입력값이 누락되었습니다"),
+    SIGNUP_INVALID_TERM_ID("a0009", HttpStatus.BAD_REQUEST, "유효하지 않은 약관 ID입니다."),
+    SIGNUP_REQUIRED_TERMS_NOT_ACCEPTED("a0010", HttpStatus.BAD_REQUEST, "필수 약관에 동의하지 않았습니다."),
 
     INTERNAL_SERVER_ERROR("common", HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류");
 
