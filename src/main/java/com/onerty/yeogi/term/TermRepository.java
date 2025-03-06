@@ -8,16 +8,8 @@ import java.util.List;
 
 @Repository
 public interface TermRepository extends JpaRepository<Term, Long> {
-    @Query("""
-            SELECT t
-            FROM Term t
-            JOIN FETCH t.termDetails td
-            WHERE td.version = (
-                SELECT MAX(tdSub.version)
-                FROM TermDetail tdSub
-                WHERE tdSub.term = t
-            )
-            """)
+
+    @Query("SELECT t FROM Term t WHERE t.version = (SELECT MAX(t2.version) FROM Term t2 WHERE t2.title = t.title)")
     List<Term> findTermsWithLatestTermDetail();
 
 }

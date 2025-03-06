@@ -22,16 +22,8 @@ public class Term extends BaseEntity {
     private String title;
     private boolean isRequired;
 
-    @OneToMany(mappedBy = "term")
-    private List<TermDetail> termDetails;
+    @Column(columnDefinition = "TEXT")
+    private String content;
+    private Integer version;
 
-    @Override
-    public String toString() {
-        return "Term{" +
-                "termId=" + termId +
-                ", title='" + title + '\'' +
-                ", isRequired=" + isRequired +
-                ", termDetails=" + termDetails +
-                '}';
-    }
 }
