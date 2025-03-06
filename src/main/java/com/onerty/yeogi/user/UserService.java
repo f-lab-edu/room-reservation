@@ -41,6 +41,7 @@ public class UserService {
         termAgreement(user, signupDto);
         boolean isMarketingAgreed = agreementRepository.findIsAgreedByAgreementId(
                 user, "마케팅 수집 동의" // termId = 3 (마케팅 수집 동의)
+                user, TermTitle.MARKETING_CONSENT.name()
         ).orElse(false);
 
         return new UserSignupResponse(user.getUserId().toString(), isMarketingAgreed);
@@ -90,6 +91,7 @@ public class UserService {
                 .map(term -> new TermDto(
                         term.getTermId(),
                         term.getTitle(),
+                        TermTitle.valueOf(term.getTitle()).getKoreanTitle(),
                         term.getContent(),
                         term.isRequired()
                 ))
