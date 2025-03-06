@@ -40,7 +40,7 @@ public class UserService {
         userRepository.save(user);
         saveAgreements(user, signupDto.agreements());
 
-        boolean isMarketingAgreed = agreementRepository.findIsAgreedByAgreementId(
+        boolean isMarketingAgreed = agreementRepository.findIsAgreedByUserAndTitle(
                 user, TermTitle.MARKETING_CONSENT.name()
         ).orElse(false);
 
