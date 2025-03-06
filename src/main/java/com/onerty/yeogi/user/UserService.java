@@ -39,8 +39,8 @@ public class UserService {
         userRepository.save(user);
 
         termAgreement(user, signupDto);
-        boolean isMarketingAgreed =  agreementRepository.findIsAgreedByAgreementId(
-                user.getUserId(), 3L // termId = 3 (마케팅 수집 동의)
+        boolean isMarketingAgreed = agreementRepository.findIsAgreedByAgreementId(
+                user, "마케팅 수집 동의" // termId = 3 (마케팅 수집 동의)
         ).orElse(false);
 
         return new UserSignupResponse(user.getUserId().toString(), isMarketingAgreed);
@@ -72,7 +72,7 @@ public class UserService {
                                 default -> false;
                             };
 
-                    return new Agreement(new AgreementId(user.getUserId(), term.getTermId()), isAgreed);
+                    return new Agreement(new AgreementId(user, term.getTitle(), term.getVersion()), isAgreed);
                 })
                 .collect(Collectors.toList());
 
@@ -90,7 +90,7 @@ public class UserService {
                 .map(term -> new TermDto(
                         term.getTermId(),
                         term.getTitle(),
-                        term.getTermDetails().isEmpty() ? "" : term.getTermDetails().get(0).getContent(),
+                        term.getContent(),
                         term.isRequired()
                 ))
                 .collect(Collectors.toList());
