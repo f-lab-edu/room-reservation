@@ -11,6 +11,7 @@ import com.onerty.yeogi.user.dto.UserSignupResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.event.Level;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -112,7 +113,7 @@ public class UserService {
     public TermResponse getTerms() {
         List<Term> terms = termRepository.findTermsWithLatestTermDetail();
         if (terms.isEmpty()) {
-            throw new YeogiException(ErrorType.TERMS_NOT_FOUND);
+            throw new YeogiException(ErrorType.TERMS_NOT_FOUND, log::error);
         }
 
         List<TermDto> termDtos = terms.stream()
