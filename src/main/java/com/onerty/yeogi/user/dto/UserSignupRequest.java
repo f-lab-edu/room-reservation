@@ -4,6 +4,8 @@ import com.onerty.yeogi.exception.YeogiException;
 import com.onerty.yeogi.exception.ErrorType;
 import com.onerty.yeogi.util.Checkable;
 
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 public record UserSignupRequest(
@@ -13,9 +15,7 @@ public record UserSignupRequest(
         String ugender,
         String ubirth,
         String afUserId,
-        boolean locationPolicy,
-        boolean privacyAuxiliaryPolicy,
-        boolean marketingAcceptance,
+        List<Map<Long, Boolean>> agreements,
         String uid,
         String upw
 ) implements Checkable {
