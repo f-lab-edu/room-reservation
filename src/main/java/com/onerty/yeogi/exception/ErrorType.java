@@ -19,6 +19,15 @@ public enum ErrorType {
     SIGNUP_INVALID_TERM_ID("a0009", HttpStatus.BAD_REQUEST, "유효하지 않은 약관 ID입니다."),
     SIGNUP_REQUIRED_TERMS_NOT_ACCEPTED("a0010", HttpStatus.BAD_REQUEST, "필수 약관에 동의하지 않았습니다."),
 
+    USER_NOT_FOUND("b0001", HttpStatus.NOT_FOUND, "존재하지 않는 회원입니다"),
+    INVALID_PASSWORD("b0002", HttpStatus.UNAUTHORIZED, "비밀번호가 일치하지 않습니다"),
+    INVALID_ACCESS_TOKEN("b0003", HttpStatus.UNAUTHORIZED, "유효하지 않은 액세스 토큰입니다"),
+    INVALID_REFRESH_TOKEN("b0004", HttpStatus.FORBIDDEN, "유효하지 않은 리프레시 토큰입니다"),
+    EXPIRED_ACCESS_TOKEN("b0005", HttpStatus.UNAUTHORIZED, "만료된 액세스 토큰입니다"),
+    EXPIRED_REFRESH_TOKEN("b0006", HttpStatus.FORBIDDEN, "만료된 리프레시 토큰입니다"),
+    LOGGED_OUT_TOKEN("b0007", HttpStatus.UNAUTHORIZED, "로그아웃된 토큰입니다"),
+
+
     INTERNAL_SERVER_ERROR("common", HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류");
 
     private String code;
