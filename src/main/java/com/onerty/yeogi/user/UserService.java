@@ -5,10 +5,7 @@ import com.onerty.yeogi.exception.YeogiException;
 import com.onerty.yeogi.term.*;
 import com.onerty.yeogi.term.dto.TermDto;
 import com.onerty.yeogi.term.dto.TermResponse;
-import com.onerty.yeogi.user.dto.NicknameResponse;
-import com.onerty.yeogi.user.dto.UserSignupRequest;
-import com.onerty.yeogi.user.dto.UserSignupResponse;
-import com.onerty.yeogi.user.dto.UserTermsAgreementStatus;
+import com.onerty.yeogi.user.dto.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -163,9 +160,9 @@ public class UserService {
         return phoneNumber + " 로 인증번호가 발송되었습니다: " + code;
     }
 
-    public void verifyCertification(Map<String, String> payload) {
-        String phoneNumber = payload.get("phoneNumber");
-        String certificationNumber = payload.get("certificationNumber");
+    public void verifyCertification(VerifyCertificationRequest request) {
+        String phoneNumber = request.phoneNumber();
+        String certificationNumber = request.certificationNumber();
         String storedCode = redisTemplate.opsForValue().get(phoneNumber);
 
         if (storedCode == null || !storedCode.trim().equals(certificationNumber.trim())) {

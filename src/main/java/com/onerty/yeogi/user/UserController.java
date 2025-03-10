@@ -5,6 +5,7 @@ import com.onerty.yeogi.term.dto.TermResponse;
 import com.onerty.yeogi.user.dto.NicknameResponse;
 import com.onerty.yeogi.user.dto.UserSignupRequest;
 import com.onerty.yeogi.user.dto.UserSignupResponse;
+import com.onerty.yeogi.user.dto.VerifyCertificationRequest;
 import com.onerty.yeogi.util.BaseResponse;
 import com.onerty.yeogi.util.MessageResponse;
 import lombok.RequiredArgsConstructor;
@@ -43,8 +44,8 @@ public class UserController {
     }
 
     @PostMapping("/v1/phone/certification")
-    public BaseResponse<MessageResponse> verifyCertification(@RequestBody Map<String, String> payload) {
-        userService.verifyCertification(payload);
+    public BaseResponse<MessageResponse> verifyCertification(@RequestBody VerifyCertificationRequest request) {
+        userService.verifyCertification(request);
         return new BaseResponse.success<>(new MessageResponse("인증되었습니다"));
     }
 }
