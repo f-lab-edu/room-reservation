@@ -3,33 +3,29 @@ package com.onerty.yeogi.user.dto;
 import com.onerty.yeogi.exception.YeogiException;
 import com.onerty.yeogi.exception.ErrorType;
 import com.onerty.yeogi.util.Checkable;
+import io.micrometer.common.util.StringUtils;
 
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import static com.onerty.yeogi.util.validation.ValidationPatterns.*;
+
 public record UserSignupRequest(
-        int utype,
-        String unick,
+        int signupType,
+        String nick,
         String phoneNumber,
-        String ugender,
-        String ubirth,
-        String afUserId,
-        List<Map<Long, Boolean>> agreements,
+        String gender,
+        String birth,
+        List<UserTermsAgreementStatus> agreements,
         String uid,
         String upw
 ) implements Checkable {
 
-    private static final Pattern EMAIL_PATTERN =
-            Pattern.compile("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$");
-
-    private static final Pattern PASSWORD_PATTERN =
-            Pattern.compile("^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$");
-
     @Override
     public void check() {
 
-        if (unick == null || unick.isBlank() || phoneNumber == null || phoneNumber.isBlank()) {
+        if (StringUtils.isBlank(nick) || StringUtils.isBlank(phoneNumber)) {
             throw new YeogiException(ErrorType.SIGNUP_MISSING_REQUIRED_FIELD);
         }
 

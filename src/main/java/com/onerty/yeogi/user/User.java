@@ -36,9 +36,6 @@ public class User extends BaseEntity {
     @Column(name = "birth_date")
     private String birthDate;
 
-    @Column(name = "affiliate_user_id")
-    private String affiliateUserId;
-
     @Column(name = "user_identifier")
     private String userIdentifier;
 
@@ -46,12 +43,11 @@ public class User extends BaseEntity {
     private String userPassword;
 
     public User(UserSignupRequest dto) {
-        this.userType = dto.utype();
-        this.nickname = dto.unick();
+        this.userType = dto.signupType();
+        this.nickname = dto.nick();
         this.phoneNumber = dto.phoneNumber();
-        this.gender = dto.ugender();
-        this.birthDate = dto.ubirth();
-        this.affiliateUserId = dto.afUserId();
+        this.gender = dto.gender();
+        this.birthDate = dto.birth();
         this.userIdentifier = dto.uid();
         this.userPassword = dto.upw();
     }
