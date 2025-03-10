@@ -8,6 +8,7 @@ import com.onerty.yeogi.term.dto.TermResponse;
 import com.onerty.yeogi.user.dto.NicknameResponse;
 import com.onerty.yeogi.user.dto.UserSignupRequest;
 import com.onerty.yeogi.user.dto.UserSignupResponse;
+import com.onerty.yeogi.user.dto.UserTermsAgreementStatus;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,7 +34,7 @@ public class UserService {
     private final StringRedisTemplate redisTemplate;
 
     public UserSignupResponse registerUser(UserSignupRequest signupDto) {
-        validateDuplicateUserAttributes(signupDto.uid(), signupDto.unick());
+        validateDuplicateUserAttributes(signupDto.uid(), signupDto.nick());
         validateLatestAndRequiredTerms(signupDto.agreements());
 
         User user = new User(signupDto);
@@ -58,7 +59,7 @@ public class UserService {
         }
     }
 
-    private void validateLatestAndRequiredTerms(List<Map<Long, Boolean>> agreements) {
+    private void validateLatestAndRequiredTerms(List<UserTermsAgreementStatus> agreements) {
         if (agreements == null || agreements.isEmpty()) {
             throw new YeogiException(ErrorType.TERMS_NOT_FOUND);
         }
@@ -69,19 +70,19 @@ public class UserService {
         Set<Long> latestTermIds = latestTerms.stream()
                 .map(Term::getTermId)
                 .collect(Collectors.toSet());
+        System.out.println(latestTermIds);
 
         Set<Long> providedTermIds = agreements.stream()
-                .flatMap(map -> map.keySet().stream())
+                .map(UserTermsAgreementStatus::termId)
                 .collect(Collectors.toSet());
-
+        System.out.println(providedTermIds);
         if (!providedTermIds.containsAll(latestTermIds)) {
             throw new YeogiException(ErrorType.SIGNUP_INVALID_TERM_ID);
         }
 
         // 2. 필수 약관이 모두 동의되었는지 검증
         Map<Long, Boolean> agreementMap = agreements.stream()
-                .flatMap(map -> map.entrySet().stream())
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                .collect(Collectors.toMap(UserTermsAgreementStatus::termId, UserTermsAgreementStatus::isAgreed));
 
         boolean allRequiredTermsAgreed = latestTerms.stream()
                 .filter(Term::isRequired)
@@ -92,12 +93,11 @@ public class UserService {
         }
     }
 
-    private void saveAgreements(User user, List<Map<Long, Boolean>> agreements) {
+    private void saveAgreements(User user, List<UserTermsAgreementStatus> agreements) {
         List<Term> terms = termRepository.findTermsWithLatestTermDetail();
 
         Map<Long, Boolean> agreementMap = agreements.stream()
-                .flatMap(map -> map.entrySet().stream())
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                .collect(Collectors.toMap(UserTermsAgreementStatus::termId, UserTermsAgreementStatus::isAgreed));
 
         List<Agreement> agreementList = terms.stream()
                 .map(term -> new Agreement(

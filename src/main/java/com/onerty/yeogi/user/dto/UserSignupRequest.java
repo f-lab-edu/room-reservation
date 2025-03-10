@@ -9,13 +9,12 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 public record UserSignupRequest(
-        int utype,
-        String unick,
+        int signupType,
+        String nick,
         String phoneNumber,
-        String ugender,
-        String ubirth,
-        String afUserId,
-        List<Map<Long, Boolean>> agreements,
+        String gender,
+        String birth,
+        List<UserTermsAgreementStatus> agreements,
         String uid,
         String upw
 ) implements Checkable {
@@ -29,7 +28,7 @@ public record UserSignupRequest(
     @Override
     public void check() {
 
-        if (unick == null || unick.isBlank() || phoneNumber == null || phoneNumber.isBlank()) {
+        if (nick == null || nick.isBlank() || phoneNumber == null || phoneNumber.isBlank()) {
             throw new YeogiException(ErrorType.SIGNUP_MISSING_REQUIRED_FIELD);
         }
 
