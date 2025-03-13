@@ -1,6 +1,6 @@
 package com.onerty.yeogi.customer.term;
 
-import com.onerty.yeogi.customer.util.BaseEntity;
+import com.onerty.yeogi.common.util.BaseEntity;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import lombok.AccessLevel;

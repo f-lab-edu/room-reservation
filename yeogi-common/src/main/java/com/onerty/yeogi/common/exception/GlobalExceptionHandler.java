@@ -1,6 +1,6 @@
-package com.onerty.yeogi.customer.exception;
+package com.onerty.yeogi.common.exception;
 
-import com.onerty.yeogi.customer.util.BaseResponse;
+import com.onerty.yeogi.common.util.BaseResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import static com.onerty.yeogi.customer.exception.ErrorType.INTERNAL_SERVER_ERROR;
+import static com.onerty.yeogi.common.exception.ErrorType.INTERNAL_SERVER_ERROR;
 
 @Slf4j
 @RestControllerAdvice

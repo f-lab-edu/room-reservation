@@ -1,5 +1,6 @@
 package com.onerty.yeogi.customer.term;
 
+import com.onerty.yeogi.common.term.Term;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;

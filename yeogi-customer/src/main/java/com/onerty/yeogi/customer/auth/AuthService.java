@@ -1,11 +1,11 @@
 package com.onerty.yeogi.customer.auth;
 
+import com.onerty.yeogi.common.exception.ErrorType;
+import com.onerty.yeogi.common.exception.YeogiException;
 import com.onerty.yeogi.customer.auth.dto.LoginRequest;
 import com.onerty.yeogi.customer.auth.dto.LoginResponse;
 import com.onerty.yeogi.customer.auth.dto.TokenRefreshRequest;
 import com.onerty.yeogi.customer.auth.dto.TokenRefreshResponse;
-import com.onerty.yeogi.customer.exception.ErrorType;
-import com.onerty.yeogi.customer.exception.YeogiException;
 import com.onerty.yeogi.customer.user.User;
 import com.onerty.yeogi.customer.user.UserRepository;
 import lombok.RequiredArgsConstructor;

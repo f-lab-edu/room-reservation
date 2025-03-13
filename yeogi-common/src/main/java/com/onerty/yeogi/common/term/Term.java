@@ -1,7 +1,7 @@
-package com.onerty.yeogi.customer.term;
+package com.onerty.yeogi.common.term;
 
 
-import com.onerty.yeogi.customer.util.BaseEntity;
+import com.onerty.yeogi.common.util.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;

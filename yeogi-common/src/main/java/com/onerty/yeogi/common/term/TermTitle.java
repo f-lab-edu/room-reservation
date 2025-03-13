@@ -1,4 +1,4 @@
-package com.onerty.yeogi.customer.term;
+package com.onerty.yeogi.common.term;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

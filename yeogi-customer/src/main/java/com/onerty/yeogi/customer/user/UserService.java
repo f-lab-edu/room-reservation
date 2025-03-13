@@ -1,8 +1,13 @@
 package com.onerty.yeogi.customer.user;
 
-import com.onerty.yeogi.customer.exception.ErrorType;
-import com.onerty.yeogi.customer.exception.YeogiException;
-import com.onerty.yeogi.customer.term.*;
+import com.onerty.yeogi.common.exception.ErrorType;
+import com.onerty.yeogi.common.exception.YeogiException;
+import com.onerty.yeogi.common.term.Term;
+import com.onerty.yeogi.common.term.TermTitle;
+import com.onerty.yeogi.customer.term.Agreement;
+import com.onerty.yeogi.customer.term.AgreementId;
+import com.onerty.yeogi.customer.term.AgreementRepository;
+import com.onerty.yeogi.customer.term.TermRepository;
 import com.onerty.yeogi.customer.term.dto.TermDto;
 import com.onerty.yeogi.customer.term.dto.TermResponse;
 import com.onerty.yeogi.customer.user.dto.*;

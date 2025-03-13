@@ -2,10 +2,8 @@ package com.onerty.yeogi.customer;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
-@SpringBootApplication
-@EnableJpaAuditing
+@SpringBootApplication(scanBasePackages = {"com.onerty.yeogi"})
 public class YeogiCustomerApplication {
 
     public static void main(String[] args) {
