@@ -27,6 +27,10 @@ public enum ErrorType {
     EXPIRED_REFRESH_TOKEN("b0006", HttpStatus.FORBIDDEN, "만료된 리프레시 토큰입니다"),
     LOGGED_OUT_TOKEN("b0007", HttpStatus.UNAUTHORIZED, "로그아웃된 토큰입니다"),
 
+    ALREADY_EXIST_TERM("t0001", HttpStatus.CONFLICT, "이미 존재하는 약관입니다."),
+    TERM_NOT_FOUND("t0002", HttpStatus.NOT_FOUND, "해당 약관을 찾을 수 없습니다."),
+    TERM_MISSING_FIELD("t0003", HttpStatus.BAD_REQUEST, "약관 생성 필수 입력값이 누락되었습니다"),
+    INVALID_TERM_TITLE("t0004", HttpStatus.FORBIDDEN, "유효하지 않은 약관 제목입니다."),
 
     INTERNAL_SERVER_ERROR("common", HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류");
 
