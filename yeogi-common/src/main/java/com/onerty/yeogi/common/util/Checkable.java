@@ -1,4 +1,4 @@
-package com.onerty.yeogi.customer.util;
+package com.onerty.yeogi.common.util;
 
 public interface Checkable {
     void check();

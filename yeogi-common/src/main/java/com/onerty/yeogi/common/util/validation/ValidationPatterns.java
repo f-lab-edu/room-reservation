@@ -1,4 +1,4 @@
-package com.onerty.yeogi.customer.util.validation;
+package com.onerty.yeogi.common.util.validation;
 
 import lombok.Getter;
 import lombok.experimental.UtilityClass;

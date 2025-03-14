@@ -1,6 +1,6 @@
-package com.onerty.yeogi.customer.util;
+package com.onerty.yeogi.common.util;
 
-import com.onerty.yeogi.customer.exception.ErrorType;
+import com.onerty.yeogi.common.exception.ErrorType;
 import lombok.Getter;
 
 @Getter

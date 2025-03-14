@@ -1,11 +1,11 @@
 package com.onerty.yeogi.customer.auth;
 
+import com.onerty.yeogi.common.util.BaseResponse;
+import com.onerty.yeogi.common.util.MessageResponse;
 import com.onerty.yeogi.customer.auth.dto.LoginRequest;
 import com.onerty.yeogi.customer.auth.dto.LoginResponse;
 import com.onerty.yeogi.customer.auth.dto.TokenRefreshRequest;
 import com.onerty.yeogi.customer.auth.dto.TokenRefreshResponse;
-import com.onerty.yeogi.customer.util.BaseResponse;
-import com.onerty.yeogi.customer.util.MessageResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 

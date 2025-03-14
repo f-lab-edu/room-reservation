@@ -1,8 +1,8 @@
 package com.onerty.yeogi.customer.user;
 
 
+import com.onerty.yeogi.common.util.BaseEntity;
 import com.onerty.yeogi.customer.user.dto.UserSignupRequest;
-import com.onerty.yeogi.customer.util.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

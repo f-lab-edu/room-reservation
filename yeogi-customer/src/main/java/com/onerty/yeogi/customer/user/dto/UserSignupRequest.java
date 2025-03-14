@@ -1,13 +1,14 @@
 package com.onerty.yeogi.customer.user.dto;
 
-import com.onerty.yeogi.customer.exception.YeogiException;
-import com.onerty.yeogi.customer.exception.ErrorType;
-import com.onerty.yeogi.customer.util.Checkable;
+import com.onerty.yeogi.common.exception.ErrorType;
+import com.onerty.yeogi.common.exception.YeogiException;
+import com.onerty.yeogi.common.util.Checkable;
 import io.micrometer.common.util.StringUtils;
 
 import java.util.List;
 
-import static com.onerty.yeogi.customer.util.validation.ValidationPatterns.*;
+import static com.onerty.yeogi.common.util.validation.ValidationPatterns.EMAIL_PATTERN;
+import static com.onerty.yeogi.common.util.validation.ValidationPatterns.PASSWORD_PATTERN;
 
 public record UserSignupRequest(
         int signupType,

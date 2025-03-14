@@ -1,4 +1,4 @@
-package com.onerty.yeogi.customer.exception;
+package com.onerty.yeogi.common.exception;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;

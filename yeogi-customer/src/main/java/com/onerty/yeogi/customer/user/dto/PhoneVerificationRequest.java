@@ -1,8 +1,8 @@
 package com.onerty.yeogi.customer.user.dto;
 
-import com.onerty.yeogi.customer.exception.ErrorType;
-import com.onerty.yeogi.customer.exception.YeogiException;
-import com.onerty.yeogi.customer.util.Checkable;
+import com.onerty.yeogi.common.exception.ErrorType;
+import com.onerty.yeogi.common.exception.YeogiException;
+import com.onerty.yeogi.common.util.Checkable;
 
 public record PhoneVerificationRequest(
         String phoneNumber,

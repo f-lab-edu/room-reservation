@@ -1,4 +1,4 @@
-package com.onerty.yeogi.customer.util;
+package com.onerty.yeogi.common.util;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
