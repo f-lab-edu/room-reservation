@@ -9,7 +9,7 @@ import com.onerty.yeogi.customer.auth.dto.TokenRefreshResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-import static com.onerty.yeogi.customer.auth.JwtUtil.removeBearerPrefix;
+import static com.onerty.yeogi.common.security.JwtUtil.removeBearerPrefix;
 
 @RestController
 @RequestMapping("/api/users")

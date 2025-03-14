@@ -1,6 +1,7 @@
 package com.onerty.yeogi.customer.user;
 
 
+import com.onerty.yeogi.common.user.UserRole;
 import com.onerty.yeogi.common.util.BaseEntity;
 import com.onerty.yeogi.customer.user.dto.UserSignupRequest;
 import jakarta.persistence.*;
@@ -41,6 +42,10 @@ public class User extends BaseEntity {
 
     @Column(name = "user_password")
     private String userPassword;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private UserRole role;
 
     public User(UserSignupRequest dto) {
         this.userType = dto.signupType();
