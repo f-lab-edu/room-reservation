@@ -5,6 +5,7 @@ import com.onerty.yeogi.admin.term.dto.TermResponse;
 import com.onerty.yeogi.admin.term.dto.UpdateTermRequest;
 import com.onerty.yeogi.common.util.BaseResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -14,6 +15,7 @@ public class TermController {
 
     private final TermService termService;
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping("")
     public BaseResponse<TermResponse> registerTerm(@RequestBody RegisterTermRequest createTermRequest) {
         createTermRequest.check();
@@ -21,6 +23,7 @@ public class TermController {
         return new BaseResponse.success<>(response);
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PatchMapping("")
     public BaseResponse<TermResponse> updateTerm(@RequestBody UpdateTermRequest updateTermRequestTermRequest) {
         updateTermRequestTermRequest.check();
