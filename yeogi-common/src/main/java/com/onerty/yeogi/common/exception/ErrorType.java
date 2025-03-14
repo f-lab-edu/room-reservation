@@ -31,6 +31,8 @@ public enum ErrorType {
     TERM_NOT_FOUND("t0002", HttpStatus.NOT_FOUND, "해당 약관을 찾을 수 없습니다."),
     TERM_MISSING_FIELD("t0003", HttpStatus.BAD_REQUEST, "약관 생성 필수 입력값이 누락되었습니다"),
     INVALID_TERM_TITLE("t0004", HttpStatus.FORBIDDEN, "유효하지 않은 약관 제목입니다."),
+    TERM_CONFLICT("t0005", HttpStatus.CONFLICT, "약관 수정 충돌이 발생했습니다"),
+
 
     INTERNAL_SERVER_ERROR("common", HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류");
 

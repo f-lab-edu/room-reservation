@@ -25,5 +25,7 @@ public class Term extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String content;
     private Integer version;
-
+    
+    @Version
+    private Integer jpaVersion;
 }

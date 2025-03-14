@@ -6,6 +6,7 @@ import com.onerty.yeogi.admin.term.dto.UpdateTermRequest;
 import com.onerty.yeogi.common.exception.ErrorType;
 import com.onerty.yeogi.common.exception.YeogiException;
 import com.onerty.yeogi.common.term.Term;
+import jakarta.persistence.OptimisticLockException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -43,6 +44,10 @@ public class TermService {
                 .version(latestTerm.getVersion() + 1)
                 .build();
 
-        return TermResponse.from(termRepository.save(newTermVersion));
+        try {
+            return TermResponse.from(termRepository.save(newTermVersion));
+        } catch (OptimisticLockException e) {
+            throw new YeogiException(ErrorType.TERM_CONFLICT);
+        }
     }
 }
