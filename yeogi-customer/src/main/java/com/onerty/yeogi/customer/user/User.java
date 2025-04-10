@@ -2,6 +2,7 @@ package com.onerty.yeogi.customer.user;
 
 
 import com.onerty.yeogi.common.util.BaseEntity;
+import com.onerty.yeogi.customer.auth.dto.JwtPayload;
 import com.onerty.yeogi.customer.user.dto.UserSignupRequest;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -51,4 +52,9 @@ public class User extends BaseEntity {
         this.userIdentifier = dto.uid();
         this.userPassword = dto.upw();
     }
+
+    public JwtPayload toJwtPayload() {
+        return new JwtPayload(this.userId, this.userIdentifier);
+    }
+
 }
