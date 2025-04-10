@@ -30,7 +30,9 @@ public class RoomType {
     @OneToMany(mappedBy = "roomType", cascade = CascadeType.ALL)
     private List<Room> rooms;
 
-    @OneToMany(mappedBy = "roomType", cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = "roomTypeId", referencedColumnName = "id")
     private List<RoomTypeStock> stocks;
+
 }
 
