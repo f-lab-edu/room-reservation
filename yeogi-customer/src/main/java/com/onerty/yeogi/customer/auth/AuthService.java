@@ -32,8 +32,8 @@ public class AuthService {
             throw new YeogiException(ErrorType.INVALID_PASSWORD);
         }
 
-        String accessToken = jwtTokenProvider.generateAccessToken(user);
-        String refreshToken = jwtTokenProvider.generateRefreshToken(user);
+        String accessToken = jwtTokenProvider.generateAccessToken(user.toJwtPayload());
+        String refreshToken = jwtTokenProvider.generateRefreshToken(user.toJwtPayload());
 
         return new LoginResponse(accessToken, refreshToken, user);
     }
@@ -41,7 +41,7 @@ public class AuthService {
     public TokenRefreshResponse refreshToken(TokenRefreshRequest request) {
         String refreshToken = request.refreshToken();
 
-        if (jwtTokenProvider.isInvalidToken(refreshToken)) {
+        if (!jwtTokenProvider.isValidToken(refreshToken)) {
             throw new YeogiException(ErrorType.INVALID_REFRESH_TOKEN);
         }
 
@@ -53,12 +53,12 @@ public class AuthService {
         User user = userRepository.findByUserIdentifier(userId)
                 .orElseThrow(() -> new YeogiException(ErrorType.USER_NOT_FOUND));
 
-        String newAccessToken = jwtTokenProvider.generateAccessToken(user);
+        String newAccessToken = jwtTokenProvider.generateAccessToken(user.toJwtPayload());
         return new TokenRefreshResponse(newAccessToken);
     }
 
     public void logout(String accessToken) {
-        if (jwtTokenProvider.isInvalidToken(accessToken)) {
+        if (!jwtTokenProvider.isValidToken(accessToken)) {
             throw new YeogiException(ErrorType.INVALID_ACCESS_TOKEN);
         }
 

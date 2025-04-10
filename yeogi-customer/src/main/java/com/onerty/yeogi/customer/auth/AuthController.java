@@ -6,7 +6,9 @@ import com.onerty.yeogi.customer.auth.dto.LoginRequest;
 import com.onerty.yeogi.customer.auth.dto.LoginResponse;
 import com.onerty.yeogi.customer.auth.dto.TokenRefreshRequest;
 import com.onerty.yeogi.customer.auth.dto.TokenRefreshResponse;
+import com.onerty.yeogi.customer.security.CustomerUserDetails;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import static com.onerty.yeogi.customer.auth.JwtUtil.removeBearerPrefix;
@@ -36,4 +38,10 @@ public class AuthController {
         authService.logout(token);
         return new BaseResponse.success<>(new MessageResponse("로그아웃에 성공했습니다"));
     }
+
+    @GetMapping("/v1/auth/me")
+    public String getMe(@AuthenticationPrincipal CustomerUserDetails userDetails) {
+        return "Hi, " + userDetails.getUsername();
+    }
+
 }

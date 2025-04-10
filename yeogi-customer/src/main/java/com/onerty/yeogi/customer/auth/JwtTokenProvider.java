@@ -1,7 +1,8 @@
 package com.onerty.yeogi.customer.auth;
 
-import com.onerty.yeogi.customer.user.User;
-import io.jsonwebtoken.*;
+import com.onerty.yeogi.customer.auth.dto.JwtPayload;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -13,28 +14,28 @@ public class JwtTokenProvider {
     private final long ACCESS_TOKEN_EXPIRATION = 60 * 60 * 1000;  // 1시간
     private final long REFRESH_TOKEN_EXPIRATION = 7 * 24 * 60 * 60 * 1000; // 7일
 
-    public String generateAccessToken(User user) {
+    public String generateAccessToken(JwtPayload jwtPayload) {
         return Jwts.builder()
-                .setSubject(user.getUserIdentifier())
+                .setSubject(jwtPayload.userIdentifier())
                 .setExpiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION))
                 .signWith(SignatureAlgorithm.HS512, SECRET_KEY)
                 .compact();
     }
 
-    public String generateRefreshToken(User user) {
+    public String generateRefreshToken(JwtPayload jwtPayload) {
         return Jwts.builder()
-                .setSubject(user.getUserIdentifier())
+                .setSubject(jwtPayload.userIdentifier())
                 .setExpiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRATION))
                 .signWith(SignatureAlgorithm.HS512, SECRET_KEY)
                 .compact();
     }
 
-    public boolean isInvalidToken(String token) {
+    public boolean isValidToken(String token) {
         try {
             Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token);
-            return false;
-        } catch (Exception e) {
             return true;
+        } catch (Exception e) {
+            return false;
         }
     }
 
