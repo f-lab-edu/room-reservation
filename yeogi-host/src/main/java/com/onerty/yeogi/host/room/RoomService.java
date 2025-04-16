@@ -1,12 +1,11 @@
-
-
-
 package com.onerty.yeogi.host.room;
 
 import com.onerty.yeogi.common.room.Accommodation;
+import com.onerty.yeogi.common.room.ActualRoom;
 import com.onerty.yeogi.common.room.RoomType;
 import com.onerty.yeogi.common.user.Host;
 import com.onerty.yeogi.host.room.dto.CreateAccommodationRequest;
+import com.onerty.yeogi.host.room.dto.CreateRoomRequest;
 import com.onerty.yeogi.host.room.dto.CreateRoomTypeRequest;
 import com.onerty.yeogi.host.user.HostRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +18,7 @@ public class RoomService {
     private final HostRepository hostRepository;
     private final AccommodationRepository accommodationRepository;
     private final RoomTypeRepository roomTypeRepository;
+    private final ActualRoomRepository actualRoomRepository;
     private final RoomRepository roomRepository;
     private final RoomTypeStockRepository roomTypeDailyAvailabilityRepository;
 
@@ -45,6 +45,16 @@ public class RoomService {
 
             roomTypeRepository.save(roomType);
 
+            if (roomTypeReq.rooms() != null) {
+                for (CreateRoomRequest roomReq : roomTypeReq.rooms()) {
+                    ActualRoom actualRoom = ActualRoom.builder()
+                            .roomNumber(roomReq.roomNumber())
+                            .floor(roomReq.floor())
+                            .roomType(roomType)
+                            .build();
+                    actualRoomRepository.save(actualRoom);
+                }
+            }
         }
 
         return accommodation;
