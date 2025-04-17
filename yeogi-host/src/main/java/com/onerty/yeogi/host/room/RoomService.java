@@ -1,10 +1,13 @@
 package com.onerty.yeogi.host.room;
 
+import com.onerty.yeogi.common.exception.ErrorType;
+import com.onerty.yeogi.common.exception.YeogiException;
 import com.onerty.yeogi.common.room.Accommodation;
 import com.onerty.yeogi.common.room.ActualRoom;
 import com.onerty.yeogi.common.room.RoomType;
 import com.onerty.yeogi.common.user.Host;
 import com.onerty.yeogi.host.room.dto.CreateAccommodationRequest;
+import com.onerty.yeogi.host.room.dto.CreateAccommodationResponse;
 import com.onerty.yeogi.host.room.dto.CreateRoomRequest;
 import com.onerty.yeogi.host.room.dto.CreateRoomTypeRequest;
 import com.onerty.yeogi.host.user.HostRepository;
@@ -22,9 +25,9 @@ public class RoomService {
     private final RoomRepository roomRepository;
     private final RoomTypeStockRepository roomTypeDailyAvailabilityRepository;
 
-    public Accommodation createAccommodation(CreateAccommodationRequest request) {
+    public CreateAccommodationResponse createAccommodation(CreateAccommodationRequest request) {
         Host host = hostRepository.findById(request.hostId())
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 호스트입니다."));
+                .orElseThrow(() -> new YeogiException(ErrorType.HOST_NOT_FOUND));
 
         Accommodation accommodation = Accommodation.builder()
                 .name(request.name())
@@ -57,7 +60,9 @@ public class RoomService {
             }
         }
 
-        return accommodation;
+        return new CreateAccommodationResponse(
+                accommodation.getId()
+        );
     }
 
 }
