@@ -24,11 +24,13 @@ public class SecurityConfig {
                 .csrf().disable()
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/users/v1/auth/token").permitAll()
+                        .requestMatchers("/api/**").permitAll() // 모든 API는 일단 허용
                         .anyRequest().authenticated()
                 )
-                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider, customerUserDetailsService),
-                        UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(
+                        new JwtAuthenticationFilter(jwtTokenProvider, customerUserDetailsService),
+                        UsernamePasswordAuthenticationFilter.class
+                )
                 .build();
     }
 }
