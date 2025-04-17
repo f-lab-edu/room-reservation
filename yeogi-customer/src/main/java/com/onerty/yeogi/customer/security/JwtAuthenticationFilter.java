@@ -24,10 +24,23 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         this.userDetailsService = userDetailsService;
     }
 
+    // 회원 전용 경로 관리
+    private boolean isProtectedPath(String path) {
+        return path.startsWith("/api/users");
+    }
+
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
+        String path = request.getRequestURI();
+
+        if (!isProtectedPath(path)) {
+            // 비회원 경로면 바로 통과
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         String token = JwtUtil.removeBearerPrefix(request.getHeader("Authorization"));
         if (token != null && jwtTokenProvider.isValidToken(token)) {
             String userId = jwtTokenProvider.getUserIdFromToken(token);
