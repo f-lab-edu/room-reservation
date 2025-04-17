@@ -33,6 +33,7 @@ public enum ErrorType {
     INVALID_TERM_TITLE("t0004", HttpStatus.FORBIDDEN, "유효하지 않은 약관 제목입니다."),
     TERM_CONFLICT("t0005", HttpStatus.CONFLICT, "약관 수정 충돌이 발생했습니다"),
 
+    HOST_NOT_FOUND("h0001", HttpStatus.NOT_FOUND, "호스트가 존재하지 않습니다"),
 
     INTERNAL_SERVER_ERROR("common", HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류");
 
