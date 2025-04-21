@@ -19,6 +19,30 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
+        jdbc:
+          batch_size: 100
+        order_updates: true
+        order_inserts: true
+        id:
+          new_generator_mappings: true
+        format_sql: true
+        use_sql_comments: true
 
 server:
   port: 8084
+
+logging:
+  level:
+    org:
+      hibernate:
+        SQL: DEBUG
+        type:
+          descriptor:
+            sql:
+              BasicBinder: TRACE
+      springframework:
+        jdbc:
+          core:
+            JdbcTemplate: DEBUG
+            StatementCreatorUtils: TRACE
+          datasource: DEBUG
