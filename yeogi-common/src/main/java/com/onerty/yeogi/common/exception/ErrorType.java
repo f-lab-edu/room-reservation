@@ -38,6 +38,15 @@ public enum ErrorType {
     ROOM_TYPE_NOT_FOUND("r0001", HttpStatus.NOT_FOUND, "존재하지 않는 RoomType입니다."),
     ROOM_STOCK_NOT_FOUND("r0002", HttpStatus.NOT_FOUND, "해당 날짜에 대한 재고가 없습니다."),
     ROOM_STOCK_EMPTY("r0003", HttpStatus.CONFLICT, "재고가 부족합니다."),
+
+    RESERVATION_NOT_FOUND("r0001", HttpStatus.NOT_FOUND, "존재하지 않는 예약입니다."),
+    RESERVATION_ALREADY_PAID("r0002", HttpStatus.CONFLICT, "이미 결제 처리된 예약입니다."),
+    RESERVATION_AMOUNT_MISMATCH("r0003", HttpStatus.BAD_REQUEST, "결제 금액이 일치하지 않습니다."),
+    RESERVATION_NOT_PAYABLE("r0004", HttpStatus.BAD_REQUEST, "결제 완료된 예약만 취소할 수 있습니다."),
+
+    PAYMENT_NOT_FOUND_OR_ALREADY_CANCELED("p0001", HttpStatus.BAD_REQUEST, "결제 정보가 없거나 이미 취소된 결제입니다."),
+    STOCK_NOT_FOUND("s0001", HttpStatus.NOT_FOUND, "재고 정보가 없습니다."),
+
     INTERNAL_SERVER_ERROR("common", HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류");
 
     private String code;
