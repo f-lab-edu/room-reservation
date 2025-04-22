@@ -1,6 +1,6 @@
 package com.onerty.yeogi.customer.security;
 
-import com.onerty.yeogi.customer.user.User;
+import com.onerty.yeogi.common.user.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 

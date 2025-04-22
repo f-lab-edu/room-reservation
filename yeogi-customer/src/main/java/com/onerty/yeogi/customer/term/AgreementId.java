@@ -1,6 +1,6 @@
 package com.onerty.yeogi.customer.term;
 
-import com.onerty.yeogi.customer.user.User;
+import com.onerty.yeogi.common.user.User;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
