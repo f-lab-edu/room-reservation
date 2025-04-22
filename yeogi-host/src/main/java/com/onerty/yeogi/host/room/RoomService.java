@@ -3,6 +3,7 @@ package com.onerty.yeogi.host.room;
 import com.onerty.yeogi.common.exception.ErrorType;
 import com.onerty.yeogi.common.exception.YeogiException;
 import com.onerty.yeogi.common.room.*;
+import com.onerty.yeogi.common.room.enums.RoomStatus;
 import com.onerty.yeogi.common.user.Host;
 import com.onerty.yeogi.host.room.dto.CreateAccommodationRequest;
 import com.onerty.yeogi.host.room.dto.CreateAccommodationResponse;
@@ -16,7 +17,9 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -38,8 +41,9 @@ public class RoomService {
                 .location(request.location())
                 .host(host)
                 .build();
-
         accommodationRepository.save(accommodation);
+
+        List<RoomType> savedRoomTypes = new ArrayList<>();
 
         for (CreateRoomTypeRequest roomTypeReq : request.roomTypes()) {
             RoomType roomType = RoomType.builder()
@@ -51,6 +55,7 @@ public class RoomService {
                     .build();
 
             roomTypeRepository.save(roomType);
+            savedRoomTypes.add(roomType);
 
             if (roomTypeReq.rooms() != null) {
                 for (CreateRoomRequest roomReq : roomTypeReq.rooms()) {
@@ -62,19 +67,23 @@ public class RoomService {
                     actualRoomRepository.save(actualRoom);
                 }
             }
-
-            generateRooms(roomType);
-            updateStock(roomType);
         }
 
-        return new CreateAccommodationResponse(
-                accommodation.getId()
-        );
+        List<RoomTypeCountProjection> roomCounts = actualRoomRepository
+                .countByRoomTypeInAccommodation(accommodation.getId());
+        Map<Long, Long> roomCountMap = roomCounts.stream()
+                .collect(Collectors.toMap(RoomTypeCountProjection::getRoomTypeId, RoomTypeCountProjection::getCount));
+
+        for (RoomType roomType : savedRoomTypes) {
+            long count = roomCountMap.getOrDefault(roomType.getId(), 0L);
+            generateRooms(roomType, count);
+            updateStock(roomType, count);
+        }
+
+        return new CreateAccommodationResponse(accommodation.getId());
     }
 
-    public void generateRooms(RoomType roomType) {
-        List<ActualRoom> actualRooms = actualRoomRepository.findByRoomType(roomType);
-
+    public void generateRooms(RoomType roomType, long count) {
         LocalDate today = LocalDate.now();
         YearMonth nextMonth = YearMonth.now().plusMonths(1);
         LocalDate end = nextMonth.atEndOfMonth();
@@ -82,16 +91,14 @@ public class RoomService {
         List<Room> rooms = new ArrayList<>();
 
         for (LocalDate date = today; !date.isAfter(end); date = date.plusDays(1)) {
-            if (roomRepository.existsByRoomTypeAndDate(roomType, date)) continue; // 멱등성
+            if (roomRepository.existsByRoomTypeAndDate(roomType, date)) continue;
 
-            for (ActualRoom ar : actualRooms) {
+            for (int i = 0; i < count; i++) {
                 rooms.add(Room.builder()
                         .id(UUID.randomUUID().toString())
                         .roomType(roomType)
                         .date(date)
-                        .roomNumber(ar.getRoomNumber())
-                        .floor(ar.getFloor())
-                        .status(Room.RoomStatus.AVAILABLE)
+                        .status(RoomStatus.AVAILABLE)
                         .build());
             }
         }
@@ -99,7 +106,7 @@ public class RoomService {
         roomRepository.saveAll(rooms);
     }
 
-    public void updateStock(RoomType roomType) {
+    public void updateStock(RoomType roomType, long count) {
         LocalDate today = LocalDate.now();
         YearMonth nextMonth = YearMonth.now().plusMonths(1);
         LocalDate end = nextMonth.atEndOfMonth();
@@ -110,11 +117,9 @@ public class RoomService {
             RoomTypeDateId id = new RoomTypeDateId(roomType.getId(), date);
             if (stockRepository.existsById(id)) continue;
 
-            int count = roomRepository.countByRoomTypeAndDate(roomType, date);
-
             stocks.add(RoomTypeStock.builder()
                     .id(id)
-                    .stock(count)
+                    .stock((int) count)
                     .build());
         }
 
