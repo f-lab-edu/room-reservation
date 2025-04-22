@@ -1,5 +1,6 @@
 package com.onerty.yeogi.common.room;
 
+import com.onerty.yeogi.common.room.enums.RoomStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,16 +20,11 @@ public class Room {
     @Column(name = "id")
     private String id;
 
-
     private String roomNumber;
     private String floor;
 
     @Enumerated(EnumType.STRING)
     private RoomStatus status;
-
-    public enum RoomStatus {
-        AVAILABLE, UNDER_MAINTENANCE
-    }
 
     @ManyToOne
     @JoinColumn(name = "room_type_id")
