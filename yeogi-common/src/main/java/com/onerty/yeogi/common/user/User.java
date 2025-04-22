@@ -1,20 +1,18 @@
-package com.onerty.yeogi.customer.user;
+package com.onerty.yeogi.common.user;
 
 
 import com.onerty.yeogi.common.util.BaseEntity;
-import com.onerty.yeogi.customer.auth.dto.JwtPayload;
-import com.onerty.yeogi.customer.user.dto.UserSignupRequest;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 
 @Entity
 @Table(name = "users")
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 public class User extends BaseEntity {
 
     @Id
@@ -42,19 +40,5 @@ public class User extends BaseEntity {
 
     @Column(name = "user_password")
     private String userPassword;
-
-    public User(UserSignupRequest dto) {
-        this.userType = dto.signupType();
-        this.nickname = dto.nick();
-        this.phoneNumber = dto.phoneNumber();
-        this.gender = dto.gender();
-        this.birthDate = dto.birth();
-        this.userIdentifier = dto.uid();
-        this.userPassword = dto.upw();
-    }
-
-    public JwtPayload toJwtPayload() {
-        return new JwtPayload(this.userId, this.userIdentifier);
-    }
 
 }

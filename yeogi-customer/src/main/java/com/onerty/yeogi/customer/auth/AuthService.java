@@ -2,11 +2,12 @@ package com.onerty.yeogi.customer.auth;
 
 import com.onerty.yeogi.common.exception.ErrorType;
 import com.onerty.yeogi.common.exception.YeogiException;
+import com.onerty.yeogi.common.user.User;
 import com.onerty.yeogi.customer.auth.dto.LoginRequest;
 import com.onerty.yeogi.customer.auth.dto.LoginResponse;
 import com.onerty.yeogi.customer.auth.dto.TokenRefreshRequest;
 import com.onerty.yeogi.customer.auth.dto.TokenRefreshResponse;
-import com.onerty.yeogi.customer.user.User;
+import com.onerty.yeogi.customer.user.UserMapper;
 import com.onerty.yeogi.customer.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,8 +33,8 @@ public class AuthService {
             throw new YeogiException(ErrorType.INVALID_PASSWORD);
         }
 
-        String accessToken = jwtTokenProvider.generateAccessToken(user.toJwtPayload());
-        String refreshToken = jwtTokenProvider.generateRefreshToken(user.toJwtPayload());
+        String accessToken = jwtTokenProvider.generateAccessToken(UserMapper.toJwtPayload(user));
+        String refreshToken = jwtTokenProvider.generateRefreshToken(UserMapper.toJwtPayload(user));
 
         return new LoginResponse(accessToken, refreshToken, user);
     }
@@ -53,7 +54,7 @@ public class AuthService {
         User user = userRepository.findByUserIdentifier(userId)
                 .orElseThrow(() -> new YeogiException(ErrorType.USER_NOT_FOUND));
 
-        String newAccessToken = jwtTokenProvider.generateAccessToken(user.toJwtPayload());
+        String newAccessToken = jwtTokenProvider.generateAccessToken(UserMapper.toJwtPayload(user));
         return new TokenRefreshResponse(newAccessToken);
     }
 

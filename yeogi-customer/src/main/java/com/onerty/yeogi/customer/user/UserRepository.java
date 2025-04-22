@@ -1,5 +1,6 @@
 package com.onerty.yeogi.customer.user;
 
+import com.onerty.yeogi.common.user.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
