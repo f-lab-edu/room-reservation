@@ -35,6 +35,9 @@ public enum ErrorType {
 
     HOST_NOT_FOUND("h0001", HttpStatus.NOT_FOUND, "호스트가 존재하지 않습니다"),
 
+    ROOM_TYPE_NOT_FOUND("r0001", HttpStatus.NOT_FOUND, "존재하지 않는 RoomType입니다."),
+    ROOM_STOCK_NOT_FOUND("r0002", HttpStatus.NOT_FOUND, "해당 날짜에 대한 재고가 없습니다."),
+    ROOM_STOCK_EMPTY("r0003", HttpStatus.CONFLICT, "재고가 부족합니다."),
     INTERNAL_SERVER_ERROR("common", HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류");
 
     private String code;
