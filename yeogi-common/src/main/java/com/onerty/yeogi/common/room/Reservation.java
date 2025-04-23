@@ -6,6 +6,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -35,6 +37,16 @@ public class Reservation {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @Builder.Default
+    @OneToMany(mappedBy = "reservation", cascade = CascadeType.ALL)
+    private List<Room> rooms = new ArrayList<>();
+
     @OneToOne(mappedBy = "reservation", cascade = CascadeType.ALL)
     private Payment payment;
+
+    public void addRoom(Room room) {
+        rooms.add(room);
+        room.setReservation(this);
+    }
+
 }
