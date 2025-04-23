@@ -40,7 +40,7 @@ public class ReservationService {
             Room room = roomRepository.findFirstByRoomTypeAndDateAndStatus(roomType, date, RoomStatus.AVAILABLE)
                     .orElseThrow(() -> new YeogiException(ErrorType.ROOM_STOCK_NOT_FOUND));
 
-            room.setStatus(RoomStatus.UNDER_MAINTENANCE);
+            room.setStatus(RoomStatus.RESERVED);
             reservedRooms.add(room);
 
             // 재고 차감
