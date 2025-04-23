@@ -17,18 +17,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class RoomController {
 
     private final RoomService roomService;
-    private final RoomGenerationService roomGenerationService;
 
     @PostMapping("/accommodation")
     public BaseResponse<CreateAccommodationResponse> registerAccommodation(@RequestBody CreateAccommodationRequest request) {
         CreateAccommodationResponse response = roomService.createAccommodation(request);
         return new BaseResponse.success<>(response);
-    }
-
-    @PostMapping("/generate-next-month")
-    public BaseResponse<MessageResponse> generateNextMonthRoomAndStock() {
-        roomGenerationService.generateNextMonthRoomAndStock();
-        return new BaseResponse.success<>(new MessageResponse("Next month's rooms and stock generated!"));
     }
 
 }

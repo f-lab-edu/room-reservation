@@ -32,4 +32,8 @@ public class Room {
 
     private LocalDate date;
 
+    @ManyToOne
+    @JoinColumn(name = "reservation_id")
+    private Reservation reservation;
+
 }

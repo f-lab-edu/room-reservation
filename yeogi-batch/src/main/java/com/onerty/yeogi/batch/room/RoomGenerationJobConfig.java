@@ -1,10 +1,8 @@
 package com.onerty.yeogi.batch.room;
 
-import com.onerty.yeogi.batch.room.repository.ActualRoomRepository;
-import com.onerty.yeogi.batch.room.repository.RoomRepository;
-import com.onerty.yeogi.batch.room.repository.RoomTypeRepository;
-import com.onerty.yeogi.batch.room.repository.RoomTypeStockRepository;
+import com.onerty.yeogi.batch.room.repository.*;
 import com.onerty.yeogi.common.room.*;
+import com.onerty.yeogi.common.room.enums.RoomStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
@@ -22,14 +20,16 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Configuration
 @RequiredArgsConstructor
 @Slf4j
 public class RoomGenerationJobConfig {
 
-    public static final String JOB_NAME = "RoomGenerationJob";
+    public static final String JOB_NAME = "RoomGenerationJob2";
 
     private final JobRepository jobRepository;
     private final PlatformTransactionManager transactionManager;
@@ -48,27 +48,36 @@ public class RoomGenerationJobConfig {
             public Room read() {
                 if (!initialized) {
                     List<RoomType> roomTypes = roomTypeRepository.findAll();
+                    List<Long> accommodationIds = roomTypes.stream()
+                            .map(rt -> rt.getAccommodation().getId())
+                            .distinct()
+                            .toList();
+
+                    List<RoomTypeCountProjection> roomCounts = actualRoomRepository.countRoomsGroupedByRoomType(accommodationIds);
+                    Map<Long, Long> roomCountMap = roomCounts.stream()
+                            .collect(Collectors.toMap(RoomTypeCountProjection::getRoomTypeId, RoomTypeCountProjection::getCount));
+
                     YearMonth nextMonth = YearMonth.now().plusMonths(1);
                     LocalDate start = nextMonth.atDay(1);
                     LocalDate end = nextMonth.atEndOfMonth();
 
                     for (RoomType roomType : roomTypes) {
-                        List<ActualRoom> actualRooms = actualRoomRepository.findByRoomType(roomType);
-                        for (LocalDate date = start; !date.isAfter(end); date = date.plusDays(1)) {
-                            if (roomRepository.existsByRoomTypeAndDate(roomType, date)) continue; // 멱등성 처리
+                        Long count = roomCountMap.getOrDefault(roomType.getId(), 0L);
 
-                            for (ActualRoom ar : actualRooms) {
+                        for (LocalDate date = start; !date.isAfter(end); date = date.plusDays(1)) {
+                            if (roomRepository.existsByRoomTypeAndDate(roomType, date)) continue;
+
+                            for (int i = 0; i < count; i++) {
                                 rooms.add(Room.builder()
                                         .id(UUID.randomUUID().toString())
                                         .roomType(roomType)
                                         .date(date)
-                                        .roomNumber(ar.getRoomNumber())
-                                        .floor(ar.getFloor())
-                                        .status(Room.RoomStatus.AVAILABLE)
+                                        .status(RoomStatus.AVAILABLE)
                                         .build());
                             }
                         }
                     }
+
                     initialized = true;
                 }
 

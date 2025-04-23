@@ -2,10 +2,13 @@ package com.onerty.yeogi.common.room;
 
 import com.onerty.yeogi.common.room.enums.ReservationStatus;
 import com.onerty.yeogi.common.user.User;
+import com.onerty.yeogi.common.util.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -13,7 +16,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Reservation {
+public class Reservation extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,6 +38,16 @@ public class Reservation {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @Builder.Default
+    @OneToMany(mappedBy = "reservation", cascade = CascadeType.ALL)
+    private List<Room> rooms = new ArrayList<>();
+
     @OneToOne(mappedBy = "reservation", cascade = CascadeType.ALL)
     private Payment payment;
+
+    public void addRoom(Room room) {
+        rooms.add(room);
+        room.setReservation(this);
+    }
+
 }

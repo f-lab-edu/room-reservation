@@ -2,12 +2,10 @@ package com.onerty.yeogi.customer.payment;
 
 import com.onerty.yeogi.common.exception.ErrorType;
 import com.onerty.yeogi.common.exception.YeogiException;
-import com.onerty.yeogi.common.room.Payment;
-import com.onerty.yeogi.common.room.Reservation;
-import com.onerty.yeogi.common.room.RoomTypeDateId;
-import com.onerty.yeogi.common.room.RoomTypeStock;
+import com.onerty.yeogi.common.room.*;
 import com.onerty.yeogi.common.room.enums.PaymentStatus;
 import com.onerty.yeogi.common.room.enums.ReservationStatus;
+import com.onerty.yeogi.common.room.enums.RoomStatus;
 import com.onerty.yeogi.customer.reservation.ReservationRepository;
 import com.onerty.yeogi.customer.payment.dto.CancelPaymentRequest;
 import com.onerty.yeogi.customer.payment.dto.CancelPaymentResponse;
@@ -27,6 +25,7 @@ public class PaymentService {
     private final PaymentRepository paymentRepository;
     private final ReservationRepository reservationRepository;
     private final RoomTypeStockRepository stockRepository;
+
     public CreatePaymentResponse pay(CreatePaymentRequest req) {
         Reservation reservation = reservationRepository.findById(req.reservationId())
                 .orElseThrow(() -> new YeogiException(ErrorType.RESERVATION_NOT_FOUND));
@@ -81,6 +80,7 @@ public class PaymentService {
         payment.setStatus(PaymentStatus.CANCELED);
         reservation.setStatus(ReservationStatus.CANCELED);
 
+        // ✅ 재고 복구
         LocalDate start = reservation.getCheckIn();
         LocalDate end = reservation.getCheckOut();
         Long roomTypeId = reservation.getRoomType().getId();
@@ -92,6 +92,13 @@ public class PaymentService {
             stock.setStock(stock.getStock() + 1);
         }
 
+        // ✅ Room 상태 복구
+        for (Room room : reservation.getRooms()) {
+            room.setStatus(RoomStatus.AVAILABLE);
+            room.setReservation(null); // 연관관계 해제 (optional, orphanRemoval 아닐 경우)
+        }
+
         return new CancelPaymentResponse(req.reservationId());
     }
+
 }
