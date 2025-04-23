@@ -2,6 +2,7 @@ package com.onerty.yeogi.common.room;
 
 import com.onerty.yeogi.common.room.enums.ReservationStatus;
 import com.onerty.yeogi.common.user.User;
+import com.onerty.yeogi.common.util.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -15,7 +16,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Reservation {
+public class Reservation extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
