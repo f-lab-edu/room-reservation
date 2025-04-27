@@ -42,6 +42,8 @@ subprojects {
         annotationProcessor 'org.projectlombok:lombok'
         implementation 'org.springframework.boot:spring-boot-starter-web'
         implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+        implementation 'p6spy:p6spy:3.9.1'
+
         developmentOnly 'org.springframework.boot:spring-boot-docker-compose'
         runtimeOnly 'com.mysql:mysql-connector-j'
         testImplementation 'org.springframework.boot:spring-boot-starter-test'
