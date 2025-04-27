@@ -1,6 +1,7 @@
 package com.onerty.yeogi.batch.room;
 
 import com.onerty.yeogi.batch.room.repository.*;
+import com.onerty.yeogi.batch.room.repository.projections.RoomTypeIdAccommodationIdProjection;
 import com.onerty.yeogi.common.room.*;
 import com.onerty.yeogi.common.room.enums.RoomStatus;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Configuration
 @RequiredArgsConstructor
@@ -41,47 +43,74 @@ public class RoomGenerationJobConfig {
     @Bean
     public ItemReader<Room> roomInsertReader() {
         return new ItemReader<>() {
-            private final List<Room> rooms = new ArrayList<>();
+            private Stream<RoomTypeIdAccommodationIdProjection> roomTypeStream;
+            private final List<Room> buffer = new ArrayList<>();
+            private Map<Long, Long> roomCountMap;
             private boolean initialized = false;
 
             @Override
             public Room read() {
                 if (!initialized) {
-                    List<RoomType> roomTypes = roomTypeRepository.findAll();
-                    List<Long> accommodationIds = roomTypes.stream()
-                            .map(rt -> rt.getAccommodation().getId())
-                            .distinct()
-                            .toList();
-
-                    List<RoomTypeCountProjection> roomCounts = actualRoomRepository.countRoomsGroupedByRoomType(accommodationIds);
-                    Map<Long, Long> roomCountMap = roomCounts.stream()
-                            .collect(Collectors.toMap(RoomTypeCountProjection::getRoomTypeId, RoomTypeCountProjection::getCount));
-
-                    YearMonth nextMonth = YearMonth.now().plusMonths(1);
-                    LocalDate start = nextMonth.atDay(1);
-                    LocalDate end = nextMonth.atEndOfMonth();
-
-                    for (RoomType roomType : roomTypes) {
-                        Long count = roomCountMap.getOrDefault(roomType.getId(), 0L);
-
-                        for (LocalDate date = start; !date.isAfter(end); date = date.plusDays(1)) {
-                            if (roomRepository.existsByRoomTypeAndDate(roomType, date)) continue;
-
-                            for (int i = 0; i < count; i++) {
-                                rooms.add(Room.builder()
-                                        .id(UUID.randomUUID().toString())
-                                        .roomType(roomType)
-                                        .date(date)
-                                        .status(RoomStatus.AVAILABLE)
-                                        .build());
-                            }
-                        }
-                    }
-
-                    initialized = true;
+                    init();
                 }
 
-                return rooms.isEmpty() ? null : rooms.removeFirst();
+                if (!buffer.isEmpty()) {
+                    return buffer.removeFirst();
+                }
+
+                return readNext();
+            }
+
+            private void init() {
+                roomTypeStream = roomTypeRepository.streamAllIdAndAccommodationId();
+
+                List<Long> accommodationIds = roomTypeStream
+                        .map(RoomTypeIdAccommodationIdProjection::getAccommodationId)
+                        .distinct()
+                        .toList();
+
+                List<RoomTypeCountProjection> roomCounts = actualRoomRepository.countRoomsGroupedByRoomType(accommodationIds);
+                roomCountMap = roomCounts.stream()
+                        .collect(Collectors.toMap(RoomTypeCountProjection::getRoomTypeId, RoomTypeCountProjection::getCount));
+
+                roomTypeStream.close();
+                roomTypeStream = roomTypeRepository.streamAllIdAndAccommodationId();
+
+                initialized = true;
+            }
+
+            private Room readNext() {
+                if (roomTypeStream == null) {
+                    return null;
+                }
+
+                RoomTypeIdAccommodationIdProjection next = roomTypeStream.findFirst().orElse(null);
+
+                if (next == null) {
+                    roomTypeStream.close();
+                    roomTypeStream = null;
+                    return null;
+                }
+
+                Long roomTypeId = next.getId();
+                Long count = roomCountMap.getOrDefault(roomTypeId, 0L);
+
+                YearMonth nextMonth = YearMonth.now().plusMonths(1);
+                LocalDate start = nextMonth.atDay(1);
+                LocalDate end = nextMonth.atEndOfMonth();
+
+                for (LocalDate date = start; !date.isAfter(end); date = date.plusDays(1)) {
+                    for (int i = 0; i < count; i++) {
+                        buffer.add(Room.builder()
+                                .id(UUID.randomUUID().toString())
+                                .roomType(RoomType.builder().id(roomTypeId).build())
+                                .date(date)
+                                .status(RoomStatus.AVAILABLE)
+                                .build());
+                    }
+                }
+
+                return buffer.isEmpty() ? null : buffer.removeFirst();
             }
         };
     }

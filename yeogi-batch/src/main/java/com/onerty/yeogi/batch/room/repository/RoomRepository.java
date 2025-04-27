@@ -11,5 +11,4 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
 
     int countByRoomTypeAndDate(RoomType roomType, LocalDate date);
 
-    boolean existsByRoomTypeAndDate(RoomType roomType, LocalDate date);
 }
