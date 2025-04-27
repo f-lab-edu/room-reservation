@@ -20,6 +20,8 @@ spring:
         dialect: org.hibernate.dialect.MySQL8Dialect
         jdbc:
           batch_size: 100
+          fetch_size: 100000
+        default_batch_fetch_size: 100
         order_updates: true
         order_inserts: true
         id:
