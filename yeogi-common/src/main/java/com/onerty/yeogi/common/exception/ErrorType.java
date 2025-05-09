@@ -43,6 +43,7 @@ public enum ErrorType {
     RESERVATION_ALREADY_PAID("r0002", HttpStatus.CONFLICT, "이미 결제 처리된 예약입니다."),
     RESERVATION_AMOUNT_MISMATCH("r0003", HttpStatus.BAD_REQUEST, "결제 금액이 일치하지 않습니다."),
     RESERVATION_NOT_PAYABLE("r0004", HttpStatus.BAD_REQUEST, "결제 완료된 예약만 취소할 수 있습니다."),
+    STOCK_ROLLBACK_AFTER_FAILURE("r0005", HttpStatus.CONFLICT, "예약 처리 중 오류가 발생하여 재고를 복구했습니다"),
 
     PAYMENT_NOT_FOUND_OR_ALREADY_CANCELED("p0001", HttpStatus.BAD_REQUEST, "결제 정보가 없거나 이미 취소된 결제입니다."),
     STOCK_NOT_FOUND("s0001", HttpStatus.NOT_FOUND, "재고 정보가 없습니다."),

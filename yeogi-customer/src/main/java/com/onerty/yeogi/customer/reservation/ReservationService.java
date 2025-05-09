@@ -37,25 +37,38 @@ public class ReservationService {
         RoomType roomType = roomTypeRepository.findById(req.roomTypeId())
                 .orElseThrow(() -> new YeogiException(ErrorType.ROOM_TYPE_NOT_FOUND));
 
-        List<LocalDate> dates = req.checkIn().datesUntil(req.checkOut()).toList();
+        List<LocalDate> dates = req.checkIn().datesUntil(req.checkOut()).sorted().toList();
 
-        for (LocalDate date : dates) {
-            String lockKey = "lock:stock:" + roomType.getId() + ":" + date;
+        List<RoomTypeStock> updatedStocks = new ArrayList<>();
 
-            lockExecutor.executeWithLock(lockKey, 3, 10, () -> {
-                RoomTypeDateId dateId = new RoomTypeDateId(roomType.getId(), date);
-                RoomTypeStock stock = stockRepository.findById(dateId)
-                        .orElseThrow(() -> new YeogiException(ErrorType.ROOM_STOCK_NOT_FOUND));
+        try {
+            for (LocalDate date : dates) {
+                String lockKey = "lock:stock:" + roomType.getId() + ":" + date;
 
-                if (stock.getStock() <= 0) {
-                    throw new YeogiException(ErrorType.ROOM_STOCK_NOT_FOUND);
-                }
+                lockExecutor.executeWithLock(lockKey, 3, 10, () -> {
+                    RoomTypeDateId dateId = new RoomTypeDateId(roomType.getId(), date);
+                    RoomTypeStock stock = stockRepository.findById(dateId)
+                            .orElseThrow(() -> new YeogiException(ErrorType.ROOM_STOCK_NOT_FOUND));
 
-                stock.setStock(stock.getStock() - 1);
-                stockRepository.save(stock);
+                    if (stock.getStock() <= 0) {
+                        throw new YeogiException(ErrorType.ROOM_STOCK_NOT_FOUND);
+                    }
 
-                return null;
-            });
+                    stock.setStock(stock.getStock() - 1);
+                    updatedStocks.add(stock);
+
+                    return null;
+                });
+            }
+            stockRepository.saveAll(updatedStocks);
+
+        } catch (Exception e) {
+            // 실패 시 차감 재고 복구
+            for (RoomTypeStock stock : updatedStocks) {
+                stock.setStock(stock.getStock() + 1);
+            }
+            stockRepository.saveAll(updatedStocks);
+            throw new YeogiException(ErrorType.STOCK_ROLLBACK_AFTER_FAILURE);
         }
 
         int nights = (int) ChronoUnit.DAYS.between(req.checkIn(), req.checkOut());
