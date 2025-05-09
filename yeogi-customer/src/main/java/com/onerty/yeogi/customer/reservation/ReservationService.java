@@ -36,7 +36,7 @@ public class ReservationService {
     private final DistributedLockExecutor lockExecutor;
     private final RedisTemplate<String, String> redisTemplate;
 
-    public CreateReservationResponse reserveRoom(CreateReservationRequest req) {
+    public CreateReservationResponse reserveRoom(CreateReservationRequest req, Long userId) {
         RoomType roomType = roomTypeRepository.findById(req.roomTypeId())
                 .orElseThrow(() -> new YeogiException(ErrorType.ROOM_TYPE_NOT_FOUND));
 
@@ -77,11 +77,11 @@ public class ReservationService {
         int nights = (int) ChronoUnit.DAYS.between(req.checkIn(), req.checkOut());
         int totalPrice = nights * roomType.getPricePerNight();
 
-        User user = userRepository.findById(req.userId())
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new YeogiException(ErrorType.USER_NOT_FOUND));
 
         TempReservation temp = TempReservation.builder()
-                .userId(user.getUserId())
+                .userId(userId)
                 .roomTypeId(roomType.getId())
                 .checkIn(req.checkIn())
                 .checkOut(req.checkOut())
