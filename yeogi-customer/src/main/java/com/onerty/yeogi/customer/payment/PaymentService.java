@@ -13,6 +13,7 @@ import com.onerty.yeogi.customer.payment.dto.CreatePaymentRequest;
 import com.onerty.yeogi.customer.payment.dto.CreatePaymentResponse;
 import com.onerty.yeogi.customer.room.RoomTypeStockRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -46,6 +47,13 @@ public class PaymentService {
             throw new YeogiException(ErrorType.RESERVATION_AMOUNT_MISMATCH);
         }
 
+        reservation.setStatus(ReservationStatus.RESERVED);
+        try {
+            reservationRepository.save(reservation);
+        } catch (ObjectOptimisticLockingFailureException e) {
+            throw new YeogiException(ErrorType.CONCURRENT_RESERVATION_CONFLICT);
+        }
+
         Payment payment = Payment.builder()
                 .reservation(reservation)
                 .amount(req.amount())
@@ -53,7 +61,6 @@ public class PaymentService {
                 .paidAt(LocalDateTime.now())
                 .build();
 
-        reservation.setStatus(ReservationStatus.RESERVED);
         Payment saved = paymentRepository.save(payment);
 
         return new CreatePaymentResponse(
@@ -80,7 +87,7 @@ public class PaymentService {
         payment.setStatus(PaymentStatus.CANCELED);
         reservation.setStatus(ReservationStatus.CANCELED);
 
-        // ✅ 재고 복구
+        // 재고 복구
         LocalDate start = reservation.getCheckIn();
         LocalDate end = reservation.getCheckOut();
         Long roomTypeId = reservation.getRoomType().getId();
@@ -92,7 +99,7 @@ public class PaymentService {
             stock.setStock(stock.getStock() + 1);
         }
 
-        // ✅ Room 상태 복구
+        // Room 상태 복구
         for (Room room : reservation.getRooms()) {
             room.setStatus(RoomStatus.AVAILABLE);
             room.setReservation(null); // 연관관계 해제 (optional, orphanRemoval 아닐 경우)

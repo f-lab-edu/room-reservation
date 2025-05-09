@@ -50,4 +50,7 @@ public class Reservation extends BaseEntity {
         room.setReservation(this);
     }
 
+    @Version
+    private Long version;
+
 }
