@@ -1,10 +1,7 @@
 package com.onerty.yeogi.customer.payment;
 
 import com.onerty.yeogi.common.util.BaseResponse;
-import com.onerty.yeogi.customer.payment.dto.CancelPaymentRequest;
-import com.onerty.yeogi.customer.payment.dto.CancelPaymentResponse;
-import com.onerty.yeogi.customer.payment.dto.CreatePaymentRequest;
-import com.onerty.yeogi.customer.payment.dto.CreatePaymentResponse;
+import com.onerty.yeogi.customer.payment.dto.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,9 +12,15 @@ public class PaymentController {
 
     private final PaymentService paymentService;
 
-    @PostMapping
-    public BaseResponse<CreatePaymentResponse> pay (@RequestBody CreatePaymentRequest request){
-        CreatePaymentResponse response = paymentService.pay(request);
+    @PostMapping("/initiate")
+    public BaseResponse<CreatePaymentResponse>  payment (@RequestBody CreatePaymentRequest request){
+        CreatePaymentResponse response = paymentService.initiatePayment(request);
+        return new BaseResponse.success<>(response);
+    }
+
+    @PostMapping("/callback")
+    public BaseResponse<CompletePaymentResponse>  payment (@RequestBody CompletePaymentRequest request){
+        CompletePaymentResponse response = paymentService.completePayment(request);
         return new BaseResponse.success<>(response);
     }
 
