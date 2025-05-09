@@ -4,14 +4,21 @@ import com.onerty.yeogi.common.exception.ErrorType;
 import com.onerty.yeogi.common.exception.YeogiException;
 import com.onerty.yeogi.common.payment.Payment;
 import com.onerty.yeogi.common.reservation.Reservation;
+import com.onerty.yeogi.common.reservation.TempReservation;
 import com.onerty.yeogi.common.room.*;
 import com.onerty.yeogi.common.room.enums.PaymentStatus;
 import com.onerty.yeogi.common.room.enums.ReservationStatus;
 import com.onerty.yeogi.common.room.enums.RoomStatus;
+import com.onerty.yeogi.common.user.User;
 import com.onerty.yeogi.customer.payment.dto.*;
 import com.onerty.yeogi.customer.reservation.ReservationRepository;
+import com.onerty.yeogi.customer.reservation.TempReservationRepository;
+import com.onerty.yeogi.customer.room.RoomTypeRepository;
 import com.onerty.yeogi.customer.room.RoomTypeStockRepository;
+import com.onerty.yeogi.customer.user.UserRepository;
+import com.onerty.yeogi.customer.utils.DistributedLockExecutor;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -24,6 +31,10 @@ public class PaymentService {
     private final PaymentRepository paymentRepository;
     private final ReservationRepository reservationRepository;
     private final RoomTypeStockRepository stockRepository;
+    private final TempReservationRepository tempReservationRepository;
+    private final UserRepository userRepository;
+    private final RoomTypeRepository roomTypeRepository;
+    private final RedisTemplate<String, String> redisTemplate;
 
 //    🧩 initiatePayment 결제 초기 데이터 생성
 //    🧩 /mock-pg/pay 에서 completePayment 호출
@@ -47,27 +58,50 @@ public class PaymentService {
     }
 
     public CompletePaymentResponse completePayment(CompletePaymentRequest request) {
-        Reservation reservation = reservationRepository.findById(request.reservationId())
+        TempReservation temp = tempReservationRepository.findById(request.tempReservationId())
                 .orElseThrow(() -> new YeogiException(ErrorType.RESERVATION_NOT_FOUND));
 
-        Payment payment = reservation.getPayment();
-        if (payment == null || payment.getStatus() != PaymentStatus.PENDING) {
-            throw new YeogiException(ErrorType.PAYMENT_NOT_FOUND_OR_ALREADY_CANCELED);
-        }
-
-        if (payment.getAmount() != request.paidAmount()) {
-            payment.setStatus(PaymentStatus.FAILED);
-            paymentRepository.save(payment);
+        if (temp.getTotalPrice() != request.paidAmount()) {
             throw new YeogiException(ErrorType.RESERVATION_AMOUNT_MISMATCH);
         }
 
-        reservation.setStatus(ReservationStatus.RESERVED);
-        payment.setStatus(PaymentStatus.COMPLETED);
-        payment.setPaidAt(LocalDateTime.now());
-        reservationRepository.save(reservation);
+        User user = userRepository.findById(temp.getUserId())
+                .orElseThrow(() -> new YeogiException(ErrorType.USER_NOT_FOUND));
+
+        RoomType roomType = roomTypeRepository.findById(temp.getRoomTypeId())
+                .orElseThrow(() -> new YeogiException(ErrorType.ROOM_TYPE_NOT_FOUND));
+
+        Reservation reservation = Reservation.builder()
+                .user(user)
+                .roomType(roomType)
+                .checkIn(temp.getCheckIn())
+                .checkOut(temp.getCheckOut())
+                .guestCount(temp.getGuestCount())
+                .totalPrice(temp.getTotalPrice())
+                .status(ReservationStatus.RESERVED)
+                .build();
+
+        Reservation saved = reservationRepository.save(reservation);
+
+        Payment payment = Payment.builder()
+                .reservation(saved)
+                .amount(temp.getTotalPrice())
+                .status(PaymentStatus.COMPLETED)
+                .paidAt(LocalDateTime.now())
+                .build();
+
         paymentRepository.save(payment);
 
-        return new CompletePaymentResponse(payment.getId(), payment.getAmount(), payment.getPaidAt(), reservation.getId());
+        // 가예약 삭제 + Redis TTL 제거
+        tempReservationRepository.deleteById(temp.getId());
+        redisTemplate.delete("reserve:temp:" + temp.getId());
+
+        return new CompletePaymentResponse(
+                payment.getId(),
+                payment.getAmount(),
+                payment.getPaidAt(),
+                saved.getId()
+        );
     }
 
     public CancelPaymentResponse cancelPayment(CancelPaymentRequest req) {

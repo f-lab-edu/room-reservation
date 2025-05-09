@@ -3,6 +3,7 @@ package com.onerty.yeogi.customer.reservation;
 import com.onerty.yeogi.common.exception.ErrorType;
 import com.onerty.yeogi.common.exception.YeogiException;
 import com.onerty.yeogi.common.reservation.Reservation;
+import com.onerty.yeogi.common.reservation.TempReservation;
 import com.onerty.yeogi.common.room.*;
 import com.onerty.yeogi.common.room.enums.ReservationStatus;
 import com.onerty.yeogi.common.user.User;
@@ -14,8 +15,10 @@ import com.onerty.yeogi.customer.room.RoomTypeStockRepository;
 import com.onerty.yeogi.customer.user.UserRepository;
 import com.onerty.yeogi.customer.utils.DistributedLockExecutor;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -29,8 +32,9 @@ public class ReservationService {
     private final RoomTypeStockRepository stockRepository;
     private final RoomTypeRepository roomTypeRepository;
     private final UserRepository userRepository;
-    private final RoomRepository roomRepository;
+    private final TempReservationRepository tempReservationRepository;
     private final DistributedLockExecutor lockExecutor;
+    private final RedisTemplate<String, String> redisTemplate;
 
     public CreateReservationResponse reserveRoom(CreateReservationRequest req) {
         RoomType roomType = roomTypeRepository.findById(req.roomTypeId())
@@ -76,17 +80,23 @@ public class ReservationService {
         User user = userRepository.findById(req.userId())
                 .orElseThrow(() -> new YeogiException(ErrorType.USER_NOT_FOUND));
 
-        Reservation reservation = Reservation.builder()
-                .user(user)
+        TempReservation temp = TempReservation.builder()
+                .userId(user.getUserId())
+                .roomTypeId(roomType.getId())
                 .checkIn(req.checkIn())
                 .checkOut(req.checkOut())
                 .guestCount(req.guestCount())
-                .status(ReservationStatus.PENDING)
-                .roomType(roomType)
                 .totalPrice(totalPrice)
                 .build();
 
-        Reservation saved = reservationRepository.save(reservation);
+        TempReservation saved = tempReservationRepository.save(temp);
+
+        // ✅ Redis TTL 등록 (15분)
+        redisTemplate.opsForValue().set(
+                "reserve:temp:" + saved.getId(),
+                "active",
+                Duration.ofMinutes(15)
+        );
 
         return new CreateReservationResponse(
                 saved.getId(),
@@ -94,9 +104,9 @@ public class ReservationService {
                 saved.getCheckOut(),
                 saved.getGuestCount(),
                 saved.getTotalPrice(),
-                saved.getStatus().name(),
-                saved.getRoomType().getId(),
-                saved.getUser().getUserId()
+                ReservationStatus.PENDING.name(),
+                saved.getRoomTypeId(),
+                saved.getUserId()
         );
     }
 
