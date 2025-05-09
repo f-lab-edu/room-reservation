@@ -47,6 +47,9 @@ public enum ErrorType {
     PAYMENT_NOT_FOUND_OR_ALREADY_CANCELED("p0001", HttpStatus.BAD_REQUEST, "결제 정보가 없거나 이미 취소된 결제입니다."),
     STOCK_NOT_FOUND("s0001", HttpStatus.NOT_FOUND, "재고 정보가 없습니다."),
 
+    LOCK_ACQUISITION_FAILED("l0001", HttpStatus.CONFLICT, "락을 획득하지 못했습니다."),
+    LOCK_INTERRUPTED("l0002", HttpStatus.INTERNAL_SERVER_ERROR, "락 대기 중 인터럽트가 발생했습니다."),
+    CONCURRENT_RESERVATION_CONFLICT("l0003",  HttpStatus.CONFLICT, "이미 결제된 예약입니다"),
     INTERNAL_SERVER_ERROR("common", HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류");
 
     private String code;
