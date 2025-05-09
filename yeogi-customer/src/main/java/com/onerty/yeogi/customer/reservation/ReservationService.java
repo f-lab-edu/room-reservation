@@ -39,31 +39,20 @@ public class ReservationService {
 
         List<LocalDate> dates = req.checkIn().datesUntil(req.checkOut()).toList();
 
-        List<Room> roomsToReserve = dates.stream()
-                .map(date -> roomRepository.findFirstByRoomTypeAndDateAndStatus(roomType, date, RoomStatus.AVAILABLE)
-                        .orElseThrow(() -> new YeogiException(ErrorType.ROOM_STOCK_NOT_FOUND))
-                )
-                .sorted(Comparator.comparing(Room::getId))
-                .toList();
-
-        List<Room> reservedRooms = new ArrayList<>();
-
-        for (Room room : roomsToReserve) {
-            String lockKey = "lock:room:" + room.getId();
-            LocalDate date = room.getDate();
+        for (LocalDate date : dates) {
+            String lockKey = "lock:stock:" + roomType.getId() + ":" + date;
 
             lockExecutor.executeWithLock(lockKey, 3, 10, () -> {
-                if (room.getStatus() != RoomStatus.AVAILABLE) {
+                RoomTypeDateId dateId = new RoomTypeDateId(roomType.getId(), date);
+                RoomTypeStock stock = stockRepository.findById(dateId)
+                        .orElseThrow(() -> new YeogiException(ErrorType.ROOM_STOCK_NOT_FOUND));
+
+                if (stock.getStock() <= 0) {
                     throw new YeogiException(ErrorType.ROOM_STOCK_NOT_FOUND);
                 }
 
-                room.setStatus(RoomStatus.RESERVED);
-                reservedRooms.add(room);
-
-                RoomTypeDateId dateId = new RoomTypeDateId(req.roomTypeId(), date);
-                RoomTypeStock stock = stockRepository.findById(dateId)
-                        .orElseThrow(() -> new YeogiException(ErrorType.ROOM_STOCK_NOT_FOUND));
                 stock.setStock(stock.getStock() - 1);
+                stockRepository.save(stock);
 
                 return null;
             });
@@ -84,12 +73,6 @@ public class ReservationService {
                 .roomType(roomType)
                 .totalPrice(totalPrice)
                 .build();
-
-        // 양방향 연관관계 설정
-        for (Room room : reservedRooms) {
-            room.setReservation(reservation);
-            reservation.getRooms().add(room);
-        }
 
         Reservation saved = reservationRepository.save(reservation);
 
