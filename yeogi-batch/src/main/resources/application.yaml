@@ -7,10 +7,10 @@ spring:
       enabled: false
 
   datasource:
-    url: ${DB_URL}
+    url: ${P6SPY_DB_URL}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    driver-class-name: com.p6spy.engine.spy.P6SpyDriver
 
   jpa:
     hibernate:
@@ -20,6 +20,8 @@ spring:
         dialect: org.hibernate.dialect.MySQL8Dialect
         jdbc:
           batch_size: 100
+          fetch_size: 100000
+        default_batch_fetch_size: 100
         order_updates: true
         order_inserts: true
         id:
@@ -38,9 +40,10 @@ server:
 
 logging:
   level:
+    com.p6spy: DEBUG
     org:
       hibernate:
-        SQL: DEBUG
+        SQL: OFF
         type:
           descriptor:
             sql:

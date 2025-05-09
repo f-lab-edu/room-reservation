@@ -19,7 +19,7 @@ public class TimeLoggingAspect {
 
         long end = System.currentTimeMillis();
         String methodName = joinPoint.getSignature().toShortString();
-        log.info("️ {} 실행 시간: {} ms", methodName, (end - start));
+        log.info("️⏰ {} 실행 시간: {} ms", methodName, (end - start));
 
         return result;
     }
