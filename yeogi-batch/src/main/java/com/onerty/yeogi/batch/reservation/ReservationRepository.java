@@ -1,6 +1,6 @@
 package com.onerty.yeogi.batch.reservation;
 
-import com.onerty.yeogi.common.room.Reservation;
+import com.onerty.yeogi.common.reservation.Reservation;
 import com.onerty.yeogi.common.room.enums.ReservationStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

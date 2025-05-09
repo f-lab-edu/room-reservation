@@ -1,5 +1,8 @@
-package com.onerty.yeogi.common.room;
+package com.onerty.yeogi.common.reservation;
 
+import com.onerty.yeogi.common.payment.Payment;
+import com.onerty.yeogi.common.room.Room;
+import com.onerty.yeogi.common.room.RoomType;
 import com.onerty.yeogi.common.room.enums.ReservationStatus;
 import com.onerty.yeogi.common.user.User;
 import com.onerty.yeogi.common.util.BaseEntity;

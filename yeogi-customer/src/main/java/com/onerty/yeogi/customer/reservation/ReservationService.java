@@ -2,9 +2,9 @@ package com.onerty.yeogi.customer.reservation;
 
 import com.onerty.yeogi.common.exception.ErrorType;
 import com.onerty.yeogi.common.exception.YeogiException;
+import com.onerty.yeogi.common.reservation.Reservation;
 import com.onerty.yeogi.common.room.*;
 import com.onerty.yeogi.common.room.enums.ReservationStatus;
-import com.onerty.yeogi.common.room.enums.RoomStatus;
 import com.onerty.yeogi.common.user.User;
 import com.onerty.yeogi.customer.reservation.dto.CreateReservationRequest;
 import com.onerty.yeogi.customer.reservation.dto.CreateReservationResponse;
@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 @Service

@@ -1,5 +1,6 @@
-package com.onerty.yeogi.common.room;
+package com.onerty.yeogi.common.payment;
 
+import com.onerty.yeogi.common.reservation.Reservation;
 import com.onerty.yeogi.common.room.enums.PaymentStatus;
 import jakarta.persistence.*;
 import lombok.*;

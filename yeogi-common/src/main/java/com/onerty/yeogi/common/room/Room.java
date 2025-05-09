@@ -1,5 +1,6 @@
 package com.onerty.yeogi.common.room;
 
+import com.onerty.yeogi.common.reservation.Reservation;
 import com.onerty.yeogi.common.room.enums.RoomStatus;
 import jakarta.persistence.*;
 import lombok.*;

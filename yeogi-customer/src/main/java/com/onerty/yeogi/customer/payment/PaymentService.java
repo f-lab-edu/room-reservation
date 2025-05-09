@@ -2,6 +2,8 @@ package com.onerty.yeogi.customer.payment;
 
 import com.onerty.yeogi.common.exception.ErrorType;
 import com.onerty.yeogi.common.exception.YeogiException;
+import com.onerty.yeogi.common.payment.Payment;
+import com.onerty.yeogi.common.reservation.Reservation;
 import com.onerty.yeogi.common.room.*;
 import com.onerty.yeogi.common.room.enums.PaymentStatus;
 import com.onerty.yeogi.common.room.enums.ReservationStatus;
@@ -10,7 +12,6 @@ import com.onerty.yeogi.customer.payment.dto.*;
 import com.onerty.yeogi.customer.reservation.ReservationRepository;
 import com.onerty.yeogi.customer.room.RoomTypeStockRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;

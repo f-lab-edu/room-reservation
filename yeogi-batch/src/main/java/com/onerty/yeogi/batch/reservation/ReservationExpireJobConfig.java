@@ -3,7 +3,7 @@ package com.onerty.yeogi.batch.reservation;
 import com.onerty.yeogi.batch.room.repository.RoomTypeStockRepository;
 import com.onerty.yeogi.common.exception.ErrorType;
 import com.onerty.yeogi.common.exception.YeogiException;
-import com.onerty.yeogi.common.room.Reservation;
+import com.onerty.yeogi.common.reservation.Reservation;
 import com.onerty.yeogi.common.room.Room;
 import com.onerty.yeogi.common.room.RoomTypeDateId;
 import com.onerty.yeogi.common.room.RoomTypeStock;
