@@ -29,4 +29,7 @@ public class Payment {
     @OneToOne
     @JoinColumn(name = "reservation_id")
     private Reservation reservation;
+    private Long tempReservationId;
+
+
 }

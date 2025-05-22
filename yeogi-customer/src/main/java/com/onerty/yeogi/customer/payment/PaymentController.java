@@ -2,7 +2,9 @@ package com.onerty.yeogi.customer.payment;
 
 import com.onerty.yeogi.common.util.BaseResponse;
 import com.onerty.yeogi.customer.payment.dto.*;
+import com.onerty.yeogi.customer.security.CustomerUserDetails;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -13,7 +15,9 @@ public class PaymentController {
     private final PaymentService paymentService;
 
     @PostMapping("/initiate")
-    public BaseResponse<CreatePaymentResponse>  payment (@RequestBody CreatePaymentRequest request){
+    public BaseResponse<CreatePaymentResponse> payment (
+            @RequestBody CreatePaymentRequest request
+           ){
         CreatePaymentResponse response = paymentService.initiatePayment(request);
         return new BaseResponse.success<>(response);
     }

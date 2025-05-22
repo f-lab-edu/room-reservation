@@ -44,6 +44,7 @@ public enum ErrorType {
     RESERVATION_AMOUNT_MISMATCH("r0003", HttpStatus.BAD_REQUEST, "결제 금액이 일치하지 않습니다."),
     RESERVATION_NOT_PAYABLE("r0004", HttpStatus.BAD_REQUEST, "결제 완료된 예약만 취소할 수 있습니다."),
     STOCK_ROLLBACK_AFTER_FAILURE("r0005", HttpStatus.CONFLICT, "예약 처리 중 오류가 발생하여 재고를 복구했습니다"),
+    RESERVATION_EXPIRED("r0060",HttpStatus.NOT_FOUND ,"만료된 예약입니다" ),
 
     PAYMENT_NOT_FOUND_OR_ALREADY_CANCELED("p0001", HttpStatus.BAD_REQUEST, "결제 정보가 없거나 이미 취소된 결제입니다."),
     STOCK_NOT_FOUND("s0001", HttpStatus.NOT_FOUND, "재고 정보가 없습니다."),
@@ -52,6 +53,7 @@ public enum ErrorType {
     LOCK_INTERRUPTED("l0002", HttpStatus.INTERNAL_SERVER_ERROR, "락 대기 중 인터럽트가 발생했습니다."),
     CONCURRENT_RESERVATION_CONFLICT("l0003",  HttpStatus.CONFLICT, "이미 결제된 예약입니다"),
     INTERNAL_SERVER_ERROR("common", HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류");
+
 
     private String code;
     private HttpStatus httpStatus;

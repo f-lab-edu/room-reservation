@@ -39,25 +39,38 @@ public class PaymentService {
 //    🧩 initiatePayment 결제 초기 데이터 생성
 //    🧩 /mock-pg/pay 에서 completePayment 호출
 //    🧩 completePayment 금액 검증 및 결제 상태 변경
-    public CreatePaymentResponse initiatePayment(CreatePaymentRequest request) {
-        Reservation reservation = reservationRepository.findById(request.reservationId())
-                .orElseThrow(() -> new YeogiException(ErrorType.RESERVATION_NOT_FOUND));
+public CreatePaymentResponse initiatePayment(CreatePaymentRequest request) {
+    TempReservation temp = tempReservationRepository.findById(request.tempReservationId())
+            .orElseThrow(() -> new YeogiException(ErrorType.RESERVATION_NOT_FOUND));
 
-        if (reservation.getStatus() != ReservationStatus.PENDING) {
-            throw new YeogiException(ErrorType.RESERVATION_ALREADY_PAID);
-        }
-
-        Payment payment = Payment.builder()
-                .reservation(reservation)
-                .amount(reservation.getTotalPrice())
-                .status(PaymentStatus.PENDING)
-                .build();
-        Payment saved = paymentRepository.save(payment);
-
-        return new CreatePaymentResponse(saved.getId(), saved.getAmount(), null, reservation.getId());
+    String redisKey = "reserve:temp:" + temp.getId();
+    Boolean exists = redisTemplate.hasKey(redisKey);
+    if (!exists) {
+        throw new YeogiException(ErrorType.RESERVATION_EXPIRED);
     }
 
+    if (paymentRepository.existsByTempReservationId(temp.getId())) {
+        throw new YeogiException(ErrorType.RESERVATION_ALREADY_PAID);
+    }
+
+    Payment payment = Payment.builder()
+            .tempReservationId(temp.getId())
+            .amount(temp.getTotalPrice())
+            .status(PaymentStatus.PENDING)
+            .build();
+
+    Payment saved = paymentRepository.save(payment);
+
+    return new CreatePaymentResponse(
+            saved.getId(),
+            saved.getAmount(),
+            null,
+            temp.getId()
+    );
+}
+
     public CompletePaymentResponse completePayment(CompletePaymentRequest request) {
+
         TempReservation temp = tempReservationRepository.findById(request.tempReservationId())
                 .orElseThrow(() -> new YeogiException(ErrorType.RESERVATION_NOT_FOUND));
 
@@ -67,7 +80,6 @@ public class PaymentService {
 
         User user = userRepository.findById(temp.getUserId())
                 .orElseThrow(() -> new YeogiException(ErrorType.USER_NOT_FOUND));
-
         RoomType roomType = roomTypeRepository.findById(temp.getRoomTypeId())
                 .orElseThrow(() -> new YeogiException(ErrorType.ROOM_TYPE_NOT_FOUND));
 
@@ -81,26 +93,26 @@ public class PaymentService {
                 .status(ReservationStatus.RESERVED)
                 .build();
 
-        Reservation saved = reservationRepository.save(reservation);
+        reservationRepository.save(reservation);
 
-        Payment payment = Payment.builder()
-                .reservation(saved)
-                .amount(temp.getTotalPrice())
-                .status(PaymentStatus.COMPLETED)
-                .paidAt(LocalDateTime.now())
-                .build();
+        Payment payment = paymentRepository.findByTempReservationIdAndStatus(temp.getId(), PaymentStatus.PENDING)
+                .orElseThrow(() -> new YeogiException(ErrorType.PAYMENT_NOT_FOUND_OR_ALREADY_CANCELED));
+
+        payment.setStatus(PaymentStatus.COMPLETED);
+        payment.setPaidAt(LocalDateTime.now());
+        payment.setReservation(reservation);
+        payment.setTempReservationId(null);
 
         paymentRepository.save(payment);
 
-        // 가예약 삭제 + Redis TTL 제거
-        tempReservationRepository.deleteById(temp.getId());
+        tempReservationRepository.deleteById(temp.getId()); // 로그 추적 위해 상태 변경으로 수정필요
         redisTemplate.delete("reserve:temp:" + temp.getId());
 
         return new CompletePaymentResponse(
                 payment.getId(),
                 payment.getAmount(),
                 payment.getPaidAt(),
-                saved.getId()
+                reservation.getId()
         );
     }
 
