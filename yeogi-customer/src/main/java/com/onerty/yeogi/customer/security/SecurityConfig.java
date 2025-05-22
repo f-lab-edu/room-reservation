@@ -25,6 +25,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/reservation/**", "/api/payment/**").authenticated()
                         .requestMatchers("/api/**").permitAll() // 모든 API는 일단 허용
                         .anyRequest().authenticated()
                 )

@@ -22,11 +22,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                    CustomerUserDetailsService userDetailsService) {
         this.jwtTokenProvider = jwtTokenProvider;
         this.userDetailsService = userDetailsService;
+
     }
 
     // 회원 전용 경로 관리
     private boolean isProtectedPath(String path) {
-        return path.startsWith("/api/users");
+        return path.startsWith("/api/users") ||
+                path.startsWith("/api/reservation") ||
+                path.startsWith("/api/payment");
     }
 
     @Override
@@ -48,6 +51,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             UsernamePasswordAuthenticationToken auth =
                     new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(auth);
+            System.out.println("🛡️ 인증 유저: {}"+ userDetails.getUsername());
+            System.out.println("🪪 권한 목록: {}"+ userDetails.getAuthorities());
+
         }
         filterChain.doFilter(request, response);
     }
