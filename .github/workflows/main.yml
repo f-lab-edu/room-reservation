@@ -43,8 +43,12 @@ jobs:
         echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> $GITHUB_ENV
         echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> $GITHUB_ENV
 
-    - name: Build with Gradle
-      run: ./gradlew clean build -x test
+    - name: Build Application Modules (excluding common)
+      run: |
+        ./gradlew :yeogi-customer:build -x test
+        ./gradlew :yeogi-admin:build -x test
+        ./gradlew :yeogi-host:build -x test
+        ./gradlew :yeogi-batch:build -x test
 
     - name: Run Tests
       run: ./gradlew test
