@@ -15,17 +15,19 @@ pipeline {
 
         stage('Build') {
             steps {
-                  sh './gradlew :yeogi-customer:clean :yeogi-customer:bootJar -x test'
+                sh './gradlew :yeogi-customer:clean :yeogi-customer:bootJar -x test'
             }
         }
 
         stage('Docker Build & Push') {
             steps {
-                sh """
-                    docker build -t $IMAGE_NAME:latest .
-                    echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin
-                    docker push $IMAGE_NAME:latest
-                """
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    sh """
+                        docker build -t $IMAGE_NAME:latest .
+                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                        docker push $IMAGE_NAME:latest
+                    """
+                }
             }
         }
 
@@ -33,9 +35,11 @@ pipeline {
             steps {
                 sshagent(['vm-ssh-key']) {
                     sh '''
-                    ssh ubuntu@127.0.0.1 "
-                      docker pull $IMAGE_NAME:latest &&
-                      docker-compose -f /home/ubuntu/yeogi/docker-compose.yml up -d
+                    ssh ubuntu@<YOUR_VM_IP> "
+                        cd /home/ubuntu/yeogi &&
+                        docker compose pull &&
+                        docker compose down &&
+                        docker compose up -d
                     "
                     '''
                 }

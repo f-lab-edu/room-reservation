@@ -1,14 +1,50 @@
+version: '3.8'
+
 services:
   mysql:
-    image: 'mysql:latest'
+    image: mysql:8.0
+    container_name: yeogi-mysql
+    ports:
+      - "65411:3306"
     environment:
-      - 'MYSQL_DATABASE=mydatabase'
-      - 'MYSQL_PASSWORD=secret'
-      - 'MYSQL_ROOT_PASSWORD=verysecret'
-      - 'MYSQL_USER=myuser'
-    ports:
-      - '3306'
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: yeogi
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - yeogi-network
+
   redis:
-    image: 'redis:latest'
+    image: redis:latest
+    container_name: yeogi-redis
     ports:
-      - '6379'
+      - "${REDIS_PORT}:6379"
+    networks:
+      - yeogi-network
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: yeogi-app
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql
+      - redis
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/yeogi
+      SPRING_DATASOURCE_USERNAME: ${DB_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+      SPRING_REDIS_HOST: redis
+      SPRING_REDIS_PORT: 6379
+    networks:
+      - yeogi-network
+
+volumes:
+  mysql-data:
+
+networks:
+  yeogi-network:

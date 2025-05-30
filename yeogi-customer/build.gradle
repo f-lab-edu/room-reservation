@@ -19,3 +19,6 @@ dependencies {
     testImplementation 'org.springframework.security:spring-security-test'
 }
 
+bootJar {
+    archiveFileName = 'app.jar'
+}
