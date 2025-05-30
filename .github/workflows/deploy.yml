@@ -10,5 +10,5 @@ jobs:
     steps:
       - name: Trigger Jenkins
         run: |
-          curl -X POST "http://192.168.45.141:8080/job/yeogi-deploy/build" \
+          curl -X POST "https://2f4a-211-58-49-88.ngrok-free.app/job/yeogi-deploy/build" \
            --user "${{ secrets.JENKINS_USER }}:${{ secrets.JENKINS_TOKEN }}"
