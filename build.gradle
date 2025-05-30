@@ -61,12 +61,4 @@ subprojects {
     tasks.named('test') {
         useJUnitPlatform()
     }
-
-    tasks.register('bootJar') {
-        enabled = false
-    }
-
-    tasks.named('jar') {
-        enabled = true
-    }
 }
