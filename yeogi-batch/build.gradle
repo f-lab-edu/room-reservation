@@ -1,3 +1,7 @@
+springBoot {
+    mainClass = 'com.onerty.yeogi.BatchApplication'
+}
+
 dependencies {
     implementation(project(":yeogi-common"))
 

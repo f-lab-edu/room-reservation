@@ -1,6 +1,6 @@
+springBoot {
+    mainClass = 'com.onerty.yeogi.AdminApplication'
+}
 dependencies {
     implementation(project(":yeogi-common"))
-}
-
-dependencies {
 }

@@ -1,3 +1,7 @@
+springBoot {
+    mainClass = 'com.onerty.yeogi.HostApplication'
+}
+
 dependencies {
     implementation(project(":yeogi-common"))
 }
