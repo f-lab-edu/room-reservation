@@ -54,7 +54,7 @@ subprojects {
         useJUnitPlatform()
     }
 
-    tasks.named('bootJar') {
+    tasks.register('bootJar') {
         enabled = false
     }
 
