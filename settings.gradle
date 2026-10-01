@@ -1,0 +1,8 @@
+rootProject.name = 'yeogi'
+
+include 'yeogi-customer'
+include 'yeogi-common'
+include 'yeogi-admin'
+include 'yeogi-host'
+include 'yeogi-batch'
+

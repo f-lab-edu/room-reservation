@@ -1,0 +1,56 @@
+spring:
+  application:
+    name: yeogi-batch
+
+  docker:
+    compose:
+      enabled: false
+
+  datasource:
+    url: ${P6SPY_DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.p6spy.engine.spy.P6SpyDriver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        jdbc:
+          batch_size: 100
+          fetch_size: 100000
+        default_batch_fetch_size: 100
+        order_updates: true
+        order_inserts: true
+        id:
+          new_generator_mappings: true
+        format_sql: true
+        use_sql_comments: true
+
+  batch:
+    jdbc:
+      initialize-schema: never
+    job:
+      enabled: false
+
+server:
+  port: 8085
+
+logging:
+  level:
+    com.p6spy: DEBUG
+    org:
+      hibernate:
+        SQL: OFF
+        type:
+          descriptor:
+            sql:
+              BasicBinder: TRACE
+      springframework:
+        jdbc:
+          core:
+            JdbcTemplate: DEBUG
+            StatementCreatorUtils: TRACE
+          datasource: DEBUG
